@@ -74,7 +74,21 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
           },
           connectors: [
             injected({ target: 'metaMask' }),
-            walletConnect({ projectId, metadata, relayUrl: 'wss://relay.walletconnect.org' })
+            walletConnect({ 
+              projectId, 
+              metadata, 
+              relayUrl: 'wss://relay.walletconnect.org',
+              // Use Infura for WalletConnect RPC if available
+              options: {
+                projectId,
+                metadata,
+                ...(infuraId ? { 
+                  rpcMap: { 
+                    [mainnet.id]: `https://mainnet.infura.io/v3/${infuraId}` 
+                  } 
+                } : {})
+              }
+            })
           ],
         });
         

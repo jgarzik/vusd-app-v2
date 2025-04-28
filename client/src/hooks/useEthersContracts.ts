@@ -61,6 +61,7 @@ export const useEthersContracts = () => {
         const infuraId = data.infuraId;
         
         if (infuraId) {
+          console.log("Using Infura for blockchain calls");
           const provider = new ethers.JsonRpcProvider(`https://mainnet.infura.io/v3/${infuraId}`);
           setInfuraProvider(provider);
         }
@@ -77,10 +78,12 @@ export const useEthersContracts = () => {
     if (window.ethereum) {
       return new ethers.BrowserProvider(window.ethereum);
     }
+    
     // Use Infura if available, otherwise fallback to a public RPC
     if (infuraProvider) {
       return infuraProvider;
     }
+    
     // Fallback to a public RPC provider
     return new ethers.JsonRpcProvider('https://eth-mainnet.public.blastapi.io');
   }, [infuraProvider]);
