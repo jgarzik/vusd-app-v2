@@ -100,7 +100,9 @@ export const useSwap = () => {
         const toTokenAddress = getTokenAddress(toToken);
         const amountIn = ethers.parseUnits(amount.toString(), 18); // VUSD has 18 decimals
         
-        const redeemable = await contracts.redeemer.redeemable(toTokenAddress, amountIn);
+        // Use getFunction to disambiguate between overloaded functions
+        const redeemableFunc = contracts.redeemer.getFunction("redeemable(address,uint256)");
+        const redeemable = await redeemableFunc(toTokenAddress, amountIn);
         const toTokenDecimals = getTokenDecimals(toToken);
         setOutputAmount(parseFloat(ethers.formatUnits(redeemable, toTokenDecimals)));
         
@@ -174,8 +176,9 @@ export const useSwap = () => {
           await approveTx.wait();
         }
         
-        // Execute redeem transaction
-        const tx = await connectedContracts.redeemer.redeem(outputTokenAddress, amount);
+        // Execute redeem transaction - use specific function signature to avoid ambiguity
+        const redeemFunc = connectedContracts.redeemer.getFunction("redeem(address,uint256)");
+        const tx = await redeemFunc(outputTokenAddress, amount);
         await tx.wait();
         
         // Refresh balances
