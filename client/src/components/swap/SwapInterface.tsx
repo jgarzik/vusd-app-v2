@@ -424,6 +424,17 @@ const SwapInterface = () => {
               ? "Loading..." 
               : buttonInfo.text}
           </Button>
+          
+          {/* Debug info - will remove in production */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-2 text-xs text-gray-500">
+              <div>isConnected: {isConnected ? 'Yes' : 'No'}</div>
+              <div>isMainnet: {isMainnet ? 'Yes' : 'No'}</div>
+              <div>needsApproval: {needsApproval ? 'Yes' : 'No'}</div>
+              <div>checkingApproval: {checkingApproval ? 'Yes' : 'No'}</div>
+              <div>loading: {loading ? 'Yes' : 'No'}</div>
+            </div>
+          )}
         </div>
       </div>
       

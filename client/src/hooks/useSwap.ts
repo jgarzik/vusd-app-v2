@@ -380,7 +380,7 @@ export const useSwap = () => {
     }
     
     try {
-      setCheckingApproval(true);
+      // Note: We'll manage the checkingApproval state outside this function
       const connectedContracts = await getConnectedContracts();
       const direction = getSwapDirection();
       
@@ -402,8 +402,6 @@ export const useSwap = () => {
     } catch (error) {
       console.error('Error checking approval:', error);
       return false;
-    } finally {
-      setCheckingApproval(false);
     }
   }, [
     address,
@@ -458,8 +456,9 @@ export const useSwap = () => {
       throw error;
     } finally {
       setLoading(false);
-      // After approval, refresh the approval status
-      await checkApprovalNeeded();
+      // After approval, manually set approval to false since we know it's approved now
+      // No need to check again with the contract
+      setNeedsApproval(false);
     }
   }, [
     address,
@@ -473,26 +472,46 @@ export const useSwap = () => {
 
   // Automatically check approval status when input changes
   useEffect(() => {
+    let isMounted = true; // Track if component is mounted
+    
     const checkApproval = async () => {
+      // Reset states initially
+      if (!isMounted) return;
+      
       if (isConnected && inputAmount > 0) {
         try {
           setCheckingApproval(true);
+          console.log('Checking if approval needed...');
           const needsApproval = await checkApprovalNeeded();
-          setNeedsApproval(needsApproval);
+          console.log('Approval check result:', needsApproval);
+          
+          // Only update state if still mounted
+          if (isMounted) {
+            setNeedsApproval(needsApproval);
+            setCheckingApproval(false);
+          }
         } catch (error) {
           console.error('Error checking approval:', error);
-          setNeedsApproval(false);
-        } finally {
-          setCheckingApproval(false);
+          if (isMounted) {
+            setNeedsApproval(false);
+            setCheckingApproval(false);
+          }
         }
       } else {
         // Reset approval state when not connected or no input
-        setNeedsApproval(false);
-        setCheckingApproval(false);
+        if (isMounted) {
+          setNeedsApproval(false);
+          setCheckingApproval(false);
+        }
       }
     };
     
     checkApproval();
+    
+    // Cleanup function to avoid state updates after unmount
+    return () => {
+      isMounted = false;
+    };
   }, [isConnected, inputAmount, inputToken, outputToken, checkApprovalNeeded]);
   
   return {
