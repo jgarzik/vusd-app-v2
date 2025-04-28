@@ -17,7 +17,7 @@
  * The interface abstracts the underlying mint/redeem contract operations to present a unified "swap" experience.
  */
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { ArrowDown } from "lucide-react";
 import TokenSelector from "./TokenSelector";
 import TransactionStatus from "./TransactionStatus";
@@ -86,12 +86,20 @@ const SwapInterface = () => {
    * This effect triggers a new swap estimation whenever the input amount or
    * either token selection changes, keeping the output value in sync.
    */
+  // Use a separate useEffect for estimating swap amounts with debounce to prevent rapid re-renders
   useEffect(() => {
-    if (inputAmount && inputAmount > 0 && inputToken && outputToken) {
-      estimateSwap(inputAmount, inputToken, outputToken);
-    } else {
-      setOutputAmount(0);
-    }
+    // Create a debounced function to avoid too many calls
+    const debouncedEstimate = setTimeout(() => {
+      if (inputAmount && inputAmount > 0 && inputToken && outputToken) {
+        console.log(`Estimating swap: ${inputAmount} ${inputToken} to ${outputToken}`);
+        estimateSwap(inputAmount, inputToken, outputToken);
+      } else {
+        setOutputAmount(0);
+      }
+    }, 300); // 300ms debounce
+    
+    // Clear timeout on cleanup
+    return () => clearTimeout(debouncedEstimate);
   }, [inputAmount, inputToken, outputToken, estimateSwap, setOutputAmount]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,7 +128,9 @@ const SwapInterface = () => {
    * 3. Approve token spending if needed
    * 4. Execute the swap if all requirements are met
    */
-  const getButtonInfo = () => {
+  // Use useMemo for the button info to avoid recalculation on every render
+  const buttonInfo = useMemo(() => {
+    console.log('Calculating button info');
     // Step 1: Check if wallet is connected
     if (!isConnected) {
       return {
@@ -220,10 +230,22 @@ const SwapInterface = () => {
         : `Swap VUSD for ${outputToken}`,
       disabled: loading || checkingApproval
     };
-  };
-  
-  // Get current button state
-  const buttonInfo = getButtonInfo();
+  }, [
+    isConnected,
+    isMainnet,
+    inputAmount,
+    inputToken,
+    outputToken,
+    balances,
+    needsApproval,
+    loading,
+    checkingApproval,
+    connectors,
+    connect,
+    approveTokens,
+    executeSwap,
+    toast
+  ]);
 
   const switchTokens = () => {
     setInputToken(outputToken);

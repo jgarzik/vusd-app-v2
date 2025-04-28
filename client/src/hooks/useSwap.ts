@@ -178,8 +178,14 @@ export const useSwap = () => {
       return;
     }
     
+    // Use a local loading variable to avoid triggering re-renders
+    let isEstimating = true;
+    
     try {
-      setLoading(true);
+      // Only set the loading state if it's a user-initiated action, not an automatic calculation
+      if (inputAmount === amount) {
+        setLoading(true);
+      }
       
       const direction: SwapDirection = toToken === 'VUSD' ? 'toVUSD' : 'fromVUSD';
       
@@ -219,9 +225,14 @@ export const useSwap = () => {
         variant: 'destructive',
       });
     } finally {
-      setLoading(false);
+      isEstimating = false;
+      
+      // Only reset the loading state if it's a user-initiated action
+      if (inputAmount === amount) {
+        setLoading(false);
+      }
     }
-  }, [contracts, getTokenAddress, getTokenDecimals, toast]);
+  }, [contracts, getTokenAddress, getTokenDecimals, toast, inputAmount]);
   
   /**
    * Executes a token swap transaction, handling approvals and blockchain interactions.
@@ -442,11 +453,13 @@ export const useSwap = () => {
         const inputTokenAddress = getTokenAddress(inputToken);
         const inputTokenContract = connectedContracts.getERC20Contract(inputTokenAddress);
         
+        console.log('Approving input token for Minter contract');
         const tx = await inputTokenContract.approve(connectedContracts.minter.target, ethers.MaxUint256);
         await tx.wait();
         return tx;
       } else {
         // Approve VUSD -> Redeemer
+        console.log('Approving VUSD for Redeemer contract');
         const tx = await connectedContracts.vusd.approve(connectedContracts.redeemer.target, ethers.MaxUint256);
         await tx.wait();
         return tx;
@@ -457,7 +470,6 @@ export const useSwap = () => {
     } finally {
       setLoading(false);
       // After approval, manually set approval to false since we know it's approved now
-      // No need to check again with the contract
       setNeedsApproval(false);
     }
   }, [
@@ -466,39 +478,58 @@ export const useSwap = () => {
     inputToken,
     getSwapDirection,
     getTokenAddress,
-    getConnectedContracts,
-    checkApprovalNeeded
+    getConnectedContracts
   ]);
 
-  // Automatically check approval status when input changes
+  // Manually check approval status - without causing infinite loops
   useEffect(() => {
     let isMounted = true; // Track if component is mounted
-    
-    const checkApproval = async () => {
-      // Reset states initially
+
+    // Create a dedicated approval checking function that doesn't depend on the hook variables
+    const checkForApproval = async () => {
       if (!isMounted) return;
-      
-      if (isConnected && inputAmount > 0) {
-        try {
-          setCheckingApproval(true);
-          console.log('Checking if approval needed...');
-          const needsApproval = await checkApprovalNeeded();
-          console.log('Approval check result:', needsApproval);
-          
-          // Only update state if still mounted
-          if (isMounted) {
-            setNeedsApproval(needsApproval);
-            setCheckingApproval(false);
-          }
-        } catch (error) {
-          console.error('Error checking approval:', error);
-          if (isMounted) {
-            setNeedsApproval(false);
-            setCheckingApproval(false);
-          }
+      if (!isConnected || !address || !inputAmount || inputAmount <= 0) {
+        if (isMounted) {
+          setNeedsApproval(false);
+          setCheckingApproval(false);
         }
-      } else {
-        // Reset approval state when not connected or no input
+        return;
+      }
+
+      try {
+        if (isMounted) setCheckingApproval(true);
+        
+        // Manually check based on current input values
+        const connectedContracts = await getConnectedContracts();
+        let isApprovalRequired = false;
+        
+        const direction = outputToken === 'VUSD' ? 'toVUSD' : 'fromVUSD';
+        
+        if (direction === 'toVUSD') {
+          // Check approval for input token -> Minter
+          const inputTokenAddress = getTokenAddress(inputToken);
+          const inputTokenContract = connectedContracts.getERC20Contract(inputTokenAddress);
+          const inputDecimals = getTokenDecimals(inputToken);
+          const amount = ethers.parseUnits(inputAmount.toString(), inputDecimals);
+          
+          const allowance = await inputTokenContract.allowance(address, connectedContracts.minter.target);
+          isApprovalRequired = allowance < amount;
+        } else {
+          // Check approval for VUSD -> Redeemer
+          const amount = ethers.parseUnits(inputAmount.toString(), 18); // VUSD has 18 decimals
+          const allowance = await connectedContracts.vusd.allowance(address, connectedContracts.redeemer.target);
+          isApprovalRequired = allowance < amount;
+        }
+        
+        console.log('Single approval check result:', isApprovalRequired);
+        
+        // Only update state if still mounted
+        if (isMounted) {
+          setNeedsApproval(isApprovalRequired);
+          setCheckingApproval(false);
+        }
+      } catch (error) {
+        console.error('Error in approval check:', error);
         if (isMounted) {
           setNeedsApproval(false);
           setCheckingApproval(false);
@@ -506,13 +537,23 @@ export const useSwap = () => {
       }
     };
     
-    checkApproval();
+    // Only run once when these values change - not on every render!
+    checkForApproval();
     
-    // Cleanup function to avoid state updates after unmount
+    // Cleanup function
     return () => {
       isMounted = false;
     };
-  }, [isConnected, inputAmount, inputToken, outputToken, checkApprovalNeeded]);
+  }, [
+    isConnected, 
+    address,
+    inputAmount, 
+    inputToken, 
+    outputToken,
+    getConnectedContracts,
+    getTokenAddress,
+    getTokenDecimals
+  ]);
   
   return {
     balances,
