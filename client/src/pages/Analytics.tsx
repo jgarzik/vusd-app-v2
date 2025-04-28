@@ -96,14 +96,24 @@ const Analytics = () => {
                     fill="#8884d8"
                     dataKey="value"
                     nameKey="symbol"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    // Remove the on-chart labels to prevent overlapping
+                    label={false}
                   >
                     {[...treasuryData.t1Assets, ...treasuryData.t2Assets].map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                  <Legend />
+                  <Tooltip 
+                    formatter={(value) => formatCurrency(value as number)}
+                    contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none' }}
+                    itemStyle={{ color: '#fff' }}
+                  />
+                  <Legend 
+                    layout="horizontal"
+                    verticalAlign="bottom"
+                    align="center"
+                    wrapperStyle={{ paddingTop: 20 }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             )}

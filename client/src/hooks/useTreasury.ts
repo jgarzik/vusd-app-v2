@@ -4,6 +4,7 @@ import { useEthersContracts } from './useEthersContracts';
 import { useToast } from './use-toast';
 import { SUPPORTED_TOKENS } from '@/constants/tokens';
 import { VUSD_ADDRESS } from '@/constants/contracts';
+import { T2_ASSETS, AssetType, STABLECOIN_ADDRESSES } from '@/constants/treasuryAssets';
 
 interface TreasuryAsset {
   symbol: string;
@@ -47,56 +48,7 @@ export const useTreasury = () => {
     ]
   });
   
-  // Define asset types for better valuation strategies
-  enum AssetType {
-    STAKED_ETH,
-    LP_TOKEN,
-    GENERIC_ERC20
-  }
-  
-  // T2 assets that we know are in the treasury but not in the whitelisted tokens list
-  const T2_ASSETS = [
-    {
-      address: '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84',
-      symbol: 'stETH',
-      name: 'Lido Staked ETH',
-      decimals: 18,
-      assetType: AssetType.STAKED_ETH,
-      // ABI for stETH specific functions
-      extraAbi: [
-        // Lido's exchange rate function
-        'function getPooledEthByShares(uint256 _sharesAmount) external view returns (uint256)'
-      ]
-    },
-    {
-      address: '0xb90047676cC13e68632c55cB5b7cBd8A4C5A0A8E',
-      symbol: 'VUSD/ETH LP',
-      name: 'SushiSwap VUSD/ETH LP',
-      decimals: 18,
-      assetType: AssetType.LP_TOKEN,
-      // ABI for SushiSwap LP specific functions
-      extraAbi: [
-        'function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)',
-        'function token0() external view returns (address)',
-        'function token1() external view returns (address)',
-        'function totalSupply() external view returns (uint256)'
-      ]
-    },
-    {
-      address: '0xBf97b59b0DFA5F6A27BfD861e661d6E22E6544de',
-      symbol: 'VUSD/USDC LP',
-      name: 'SushiSwap VUSD/USDC LP',
-      decimals: 18,
-      assetType: AssetType.LP_TOKEN,
-      // ABI for SushiSwap LP specific functions (same as other LP tokens)
-      extraAbi: [
-        'function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)',
-        'function token0() external view returns (address)',
-        'function token1() external view returns (address)',
-        'function totalSupply() external view returns (uint256)'
-      ]
-    }
-  ];
+  // Using T2_ASSETS and AssetType imported from constants/treasuryAssets.ts
   
   // Function to fetch price of ETH in USD using CoinGecko API
   const fetchEthPrice = async (): Promise<number> => {
@@ -167,8 +119,10 @@ export const useTreasury = () => {
         const token1AddressLower = token1Address.toLowerCase();
         const vusdAddressLower = VUSD_ADDRESS.toLowerCase();
         
-        // USDC address (commonly found in LP pairs)
-        const usdcAddressLower = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase();
+        // Get stablecoin addresses from constants for comparison
+        const usdcAddressLower = STABLECOIN_ADDRESSES.USDC.toLowerCase();
+        const usdtAddressLower = STABLECOIN_ADDRESSES.USDT.toLowerCase();
+        const daiAddressLower = STABLECOIN_ADDRESSES.DAI.toLowerCase();
         
         // Determine token types and values based on the pair
         if (token0AddressLower === vusdAddressLower || token1AddressLower === vusdAddressLower) {
@@ -185,10 +139,10 @@ export const useTreasury = () => {
           if (otherTokenAddress === usdcAddressLower) {
             // USDC pair - stablecoin is 1:1 with USD, but has 6 decimals
             ownedOtherValue = parseFloat(ethers.formatUnits(otherTokenReserve, 6)) * ownershipRatio;
-          } else if (otherTokenAddress === '0xdac17f958d2ee523a2206206994597c13d831ec7'.toLowerCase()) {
+          } else if (otherTokenAddress === usdtAddressLower) {
             // USDT pair - stablecoin is 1:1 with USD, but has 6 decimals
             ownedOtherValue = parseFloat(ethers.formatUnits(otherTokenReserve, 6)) * ownershipRatio;
-          } else if (otherTokenAddress === '0x6b175474e89094c44da98b954eedeac495271d0f'.toLowerCase()) {
+          } else if (otherTokenAddress === daiAddressLower) {
             // DAI pair - stablecoin is 1:1 with USD, has 18 decimals
             ownedOtherValue = parseFloat(ethers.formatUnits(otherTokenReserve, 18)) * ownershipRatio;
           } else {
