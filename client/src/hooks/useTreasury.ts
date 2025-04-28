@@ -130,13 +130,14 @@ export const useTreasury = () => {
         
         // Determine token types and values based on the pair
         if (token0AddressLower === vusdAddressLower || token1AddressLower === vusdAddressLower) {
-          // This is a VUSD pair
-          const vusdReserve = token0AddressLower === vusdAddressLower ? reserve0 : reserve1;
+          // This is a VUSD pair, but we only count the non-VUSD value to avoid double-counting
           const otherTokenReserve = token0AddressLower === vusdAddressLower ? reserve1 : reserve0;
           const otherTokenAddress = token0AddressLower === vusdAddressLower ? token1AddressLower : token0AddressLower;
           
-          // Calculate owned VUSD (always 1:1 with USD)
-          const ownedVusd = parseFloat(ethers.formatUnits(vusdReserve, 18)) * ownershipRatio;
+          // For display purposes, we need to know the amount, but we DON'T add to the value
+          const ownedVusd = parseFloat(ethers.formatUnits(
+            token0AddressLower === vusdAddressLower ? reserve0 : reserve1, 18
+          )) * ownershipRatio;
           
           let ownedOtherValue = 0;
           
@@ -154,8 +155,9 @@ export const useTreasury = () => {
             ownedOtherValue = parseFloat(ethers.formatUnits(otherTokenReserve, 18)) * ownershipRatio * ethPrice;
           }
           
-          // Total value is the sum of both sides
-          value = ownedVusd + ownedOtherValue;
+          // IMPORTANT: Only count the non-VUSD value to avoid double-counting VUSD
+          // This fixes the double-counting issue described in the requirements
+          value = ownedOtherValue;
         } else {
           // Not a VUSD pair, use default valuation
           // This is a simplified approach and should be expanded with more token prices
@@ -310,14 +312,27 @@ export const useTreasury = () => {
           
           // For testing and development, add placeholder data when errors occur
           if (process.env.NODE_ENV === 'development') {
-            const placeholderValue = t2Asset.symbol === 'stETH' ? 125000 : 75000;
+            // For SushiSwap LP tokens with VUSD, only count the non-VUSD portion to avoid double-counting
+            let placeholderValue = 0;
+            
+            if (t2Asset.symbol === 'stETH') {
+              placeholderValue = 64640; // Example ETH price calculation: 18.47 ETH * $3500
+            } else if (t2Asset.symbol === 'VUSD/ETH LP') {
+              // Only count the ETH side of the VUSD/ETH LP
+              placeholderValue = 4375; // Example: 1.25 ETH * $3500 (excluding VUSD value)
+            } else if (t2Asset.symbol === 'VUSD/USDC LP') {
+              // Only count the USDC side of the VUSD/USDC LP
+              placeholderValue = 1012; // Example: $1012 in USDC (excluding VUSD value)
+            }
+            
             t2Assets.push({
               symbol: t2Asset.symbol,
               name: t2Asset.name,
               value: placeholderValue,
-              balance: placeholderValue / 3500, // Assuming ETH price of 3500
+              balance: t2Asset.symbol.includes('LP') ? 0 : placeholderValue / 3500, // Proper display for balances
               address: t2Asset.address
             });
+            
             t2Value += placeholderValue;
           }
         }
