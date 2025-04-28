@@ -9,11 +9,15 @@ import OpportunitiesRow from "@/components/usevusd/OpportunitiesRow";
 const Swap = () => {
   return (
     <div className="container mx-auto px-4">
-      {/* Top section with Swap and Treasury */}
-      <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto mb-8">
+      <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto">
         {/* Left column - Swap Interface */}
         <div className="w-full lg:w-8/12">
           <SwapInterface />
+          
+          {/* Bottom section with opportunity cards - reduced vertical gap */}
+          <div className="mt-3">
+            <OpportunitiesRow showViewAll={true} />
+          </div>
         </div>
         
         {/* Right column - Treasury Analytics */}
@@ -22,11 +26,6 @@ const Swap = () => {
             <TreasuryCard previewMode={true} />
           </div>
         </div>
-      </div>
-      
-      {/* Bottom section with opportunity cards */}
-      <div className="max-w-7xl mx-auto mt-6">
-        <OpportunitiesRow showViewAll={true} />
       </div>
     </div>
   );

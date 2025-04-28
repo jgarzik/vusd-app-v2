@@ -20,7 +20,7 @@ const OpportunitiesRow = ({
   
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <h2 className="text-xl font-heading font-semibold">Use Your VUSD</h2>
         {showViewAll && (
           <Link href="/use-vusd">
@@ -31,7 +31,7 @@ const OpportunitiesRow = ({
         )}
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {displayLinks.map((link, index) => (
           <OpportunityCard key={index} link={link} />
         ))}
