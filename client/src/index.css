@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+  --radius: 0.5rem;
+  
+  /* Chart colors */
+  --chart-1: 210 100% 50%;
+  --chart-2: 45 100% 50%;
+  --chart-3: 120 100% 40%;
+  --chart-4: 280 100% 50%;
+  --chart-5: 0 100% 50%;
+  
+  /* Sidebar colors */
+  --sidebar-background: 240 10% 3.9%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 207 90% 54%;
+  --sidebar-primary-foreground: 211 100% 99%;
+  --sidebar-accent: 240 3.7% 15.9%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-border: 240 3.7% 15.9%;
+  --sidebar-ring: 240 4.9% 83.9%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Custom styles for the gradient text */
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500;
+}
+
+/* Custom styles for swap container */
+.swap-container {
+  @apply bg-card rounded-2xl shadow-lg overflow-hidden;
+}
+
+/* Custom background for mobile nav */
+.mobile-nav {
+  @apply bg-background border-b border-border;
+}
+
+/* Token icon styles */
+.token-icon {
+  @apply w-8 h-8 rounded-full overflow-hidden flex items-center justify-center;
+}
+
+.token-icon-usdc {
+  @apply bg-blue-500;
+}
+
+.token-icon-usdt {
+  @apply bg-green-500;
+}
+
+.token-icon-dai {
+  @apply bg-yellow-500;
+}
+
+.token-icon-vusd {
+  @apply bg-gradient-to-r from-primary to-purple-500;
+}
