@@ -139,8 +139,9 @@ export const useTreasury = () => {
       try {
         // Get total supply and calculate ownership percentage
         const totalSupply = await tokenContract.totalSupply();
-        const oneEther = ethers.parseEther("1.0");
-        const ownershipRatio = tokenBalance.mul(oneEther).div(totalSupply);
+        
+        // Calculate ownership ratio as a floating point number (0.0-1.0)
+        const ownershipRatio = Number(tokenBalance) / Number(totalSupply);
         
         // Get reserves and token addresses
         const [reserve0, reserve1] = await tokenContract.getReserves();
@@ -153,9 +154,9 @@ export const useTreasury = () => {
         const ethReserve = token0Address.toLowerCase() === VUSD_ADDRESS.toLowerCase() ? 
           reserve1 : reserve0;
         
-        // Calculate value of owned reserves
-        const ownedVusd = parseFloat(ethers.formatUnits(vusdReserve.mul(ownershipRatio).div(oneEther), 18));
-        const ownedEth = parseFloat(ethers.formatUnits(ethReserve.mul(ownershipRatio).div(oneEther), 18));
+        // Calculate value of owned reserves using the ownership ratio
+        const ownedVusd = parseFloat(ethers.formatUnits(vusdReserve, 18)) * ownershipRatio;
+        const ownedEth = parseFloat(ethers.formatUnits(ethReserve, 18)) * ownershipRatio;
         
         // Calculate total value (VUSD is 1:1 with USD, ETH uses current price)
         value = ownedVusd + (ownedEth * ethPrice);
@@ -170,7 +171,7 @@ export const useTreasury = () => {
   // Generic function for other ERC20 tokens
   const valueGenericErc20Asset = async (
     tokenContract: ethers.Contract,
-    tokenBalance: ethers.BigNumber,
+    tokenBalance: bigint,
     decimals: number
   ): Promise<{ value: number, balance: number }> => {
     const balance = parseFloat(ethers.formatUnits(tokenBalance, decimals));
