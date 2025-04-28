@@ -25,6 +25,7 @@ import { useWeb3 } from './useWeb3';
 import { useEthersContracts } from './useEthersContracts';
 import { useToast } from './use-toast';
 import { SUPPORTED_TOKENS } from '@/constants/tokens';
+import { parseUnits } from 'ethers/lib/utils';
 
 type TokenBalances = Record<string, number>;
 type SwapDirection = 'toVUSD' | 'fromVUSD';
@@ -128,13 +129,13 @@ export const useSwap = () => {
    * @throws Logs errors to console but doesn't propagate them to prevent UI disruption
    */
   const fetchBalances = useCallback(async () => {
-    if (!isConnected || !address || !contracts) return;
+    if (!isConnected || !address) return;
     
     try {
       const newBalances: TokenBalances = { ...balances };
       
       for (const token of SUPPORTED_TOKENS) {
-        if (token.symbol === 'VUSD' && contracts.vusd) {
+        if (token.symbol === 'VUSD') {
           const balance = await contracts.vusd.balanceOf(address);
           newBalances.VUSD = parseFloat(ethers.formatUnits(balance, token.decimals));
         } else {
@@ -177,15 +178,13 @@ export const useSwap = () => {
       return;
     }
     
-    if (!contracts) {
-      setOutputAmount(0);
-      return;
-    }
-    
     try {
+      setLoading(true);
+      
       const direction: SwapDirection = toToken === 'VUSD' ? 'toVUSD' : 'fromVUSD';
       
-      if (direction === 'toVUSD' && contracts.minter) {
+      if (direction === 'toVUSD') {
+        // Minting VUSD
         const fromTokenAddress = getTokenAddress(fromToken);
         const fromTokenDecimals = getTokenDecimals(fromToken);
         const amountIn = ethers.parseUnits(amount.toString(), fromTokenDecimals);
@@ -193,21 +192,23 @@ export const useSwap = () => {
         const mintage = await contracts.minter.calculateMintage(fromTokenAddress, amountIn);
         setOutputAmount(parseFloat(ethers.formatUnits(mintage, 18)));
         
+        // Get minting fee
         const mintingFee = await contracts.minter.mintingFee();
         setFee(parseFloat(ethers.formatUnits(mintingFee, 4)) / 100);
-      } else if (direction === 'fromVUSD' && contracts.redeemer) {
+      } else {
+        // Redeeming VUSD
         const toTokenAddress = getTokenAddress(toToken);
         const amountIn = ethers.parseUnits(amount.toString(), 18); // VUSD has 18 decimals
         
+        // Use getFunction to disambiguate between overloaded functions
         const redeemableFunc = contracts.redeemer.getFunction("redeemable(address,uint256)");
         const redeemable = await redeemableFunc(toTokenAddress, amountIn);
         const toTokenDecimals = getTokenDecimals(toToken);
         setOutputAmount(parseFloat(ethers.formatUnits(redeemable, toTokenDecimals)));
         
+        // Get redeem fee
         const redeemFee = await contracts.redeemer.redeemFee();
         setFee(parseFloat(ethers.formatUnits(redeemFee, 4)) / 100);
-      } else {
-        setOutputAmount(0);
       }
     } catch (error) {
       console.error('Error estimating swap:', error);
@@ -217,6 +218,8 @@ export const useSwap = () => {
         description: 'Failed to estimate swap amount',
         variant: 'destructive',
       });
+    } finally {
+      setLoading(false);
     }
   }, [contracts, getTokenAddress, getTokenDecimals, toast]);
   
