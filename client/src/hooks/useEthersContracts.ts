@@ -19,7 +19,7 @@
  * All contract instances are memoized for performance.
  */
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { Contract, ethers } from 'ethers';
 import { useWeb3 } from './useWeb3';
 import { useToast } from './use-toast';
@@ -50,43 +50,15 @@ const getChecksumAddress = (address: string) => {
 export const useEthersContracts = () => {
   const { toast } = useToast();
   const { isConnected } = useWeb3();
-  const [infuraProvider, setInfuraProvider] = useState<ethers.JsonRpcProvider | null>(null);
-  
-  // Fetch Infura ID and set up provider
-  useEffect(() => {
-    const fetchInfuraId = async () => {
-      try {
-        const response = await fetch('/api/config');
-        const data = await response.json();
-        const infuraId = data.infuraId;
-        
-        if (infuraId) {
-          console.log("Using Infura for blockchain calls");
-          const provider = new ethers.JsonRpcProvider(`https://mainnet.infura.io/v3/${infuraId}`);
-          setInfuraProvider(provider);
-        }
-      } catch (error) {
-        console.error('Error fetching Infura ID:', error);
-      }
-    };
-    
-    fetchInfuraId();
-  }, []);
   
   // Get Ethereum provider
   const getProvider = useMemo(() => {
     if (window.ethereum) {
       return new ethers.BrowserProvider(window.ethereum);
     }
-    
-    // Use Infura if available, otherwise fallback to a public RPC
-    if (infuraProvider) {
-      return infuraProvider;
-    }
-    
     // Fallback to a public RPC provider
     return new ethers.JsonRpcProvider('https://eth-mainnet.public.blastapi.io');
-  }, [infuraProvider]);
+  }, []);
   
   // Get contract instances
   const contracts = useMemo(() => {

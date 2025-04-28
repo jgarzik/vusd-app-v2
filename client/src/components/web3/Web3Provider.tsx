@@ -27,6 +27,15 @@ import { injected, walletConnect } from 'wagmi/connectors';
 // Initial query client for data fetching
 const queryClient = new QueryClient();
 
+// Set up the wagmi config with Ethereum mainnet
+// Use the current deployed URL instead of a hardcoded one to prevent WalletConnect warnings
+const metadata = {
+  name: 'VUSD Application',
+  description: 'Swap to or from the VUSD stablecoin',
+  url: 'https://vusd-hub.replit.app', // Current Replit deployment URL
+  icons: ['https://avatars.githubusercontent.com/u/37784886']
+};
+
 interface Web3ProviderProps {
   children: React.ReactNode;
 }
@@ -40,44 +49,25 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
     const initializeWeb3 = async () => {
       try {
         setIsLoading(true);
-        
         // Fetch configuration from backend
         const response = await fetch('/api/config');
         const data = await response.json();
         
         const projectId = data.walletConnectProjectId;
-        const infuraId = data.infuraId;
         
         if (!projectId) {
           console.warn('WalletConnect Project ID is missing. Wallet connection may not work correctly.');
         }
         
-        if (!infuraId) {
-          console.warn('Infura ID is missing. Using default RPC provider, which may have rate limits.');
-        }
-        
-        // Get dynamic metadata with current URL
-        const metadata = {
-          name: 'VUSD Application',
-          description: 'Swap to or from the VUSD stablecoin',
-          url: window.location.origin,
-          icons: ['https://avatars.githubusercontent.com/u/37784886']
-        };
-        
-        // Create wagmi config with Infura provider
+        // Create wagmi config
         const config = createConfig({
           chains: [mainnet],
           transports: {
-            [mainnet.id]: infuraId 
-              ? http(`https://mainnet.infura.io/v3/${infuraId}`) 
-              : http(), // Fallback to default if no Infura ID
+            [mainnet.id]: http(),
           },
           connectors: [
             injected({ target: 'metaMask' }),
-            walletConnect({ 
-              projectId, 
-              metadata
-            })
+            walletConnect({ projectId, metadata, relayUrl: 'wss://relay.walletconnect.org' })
           ],
         });
         
