@@ -17,7 +17,7 @@
  * The interface abstracts the underlying mint/redeem contract operations to present a unified "swap" experience.
  */
 
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { ArrowDown } from "lucide-react";
 import TokenSelector from "./TokenSelector";
 import TransactionStatus from "./TransactionStatus";
@@ -135,12 +135,12 @@ const SwapInterface = () => {
     disabled: false
   });
   
-  // Calculate button info once on initial render and when dependencies change
+  // Update button state directly instead of using a function
   useEffect(() => {
-    // Don't calculate during loading states to prevent loops
-    if (loading || checkingApproval) return;
+    // Only update when we're not in a loading state
+    if (loading || checkingApproval) return; 
     
-    console.log('Recalculating button state');
+    console.log('Updating button state directly');
     
     // Step 1: Check if wallet is connected
     if (!isConnected) {
@@ -461,15 +461,14 @@ const SwapInterface = () => {
             </div>
           </div>
           
-          {/* Smart Cascading Swap Button */}
+          {/* Smart Cascading Swap Button - separate display logic from state */}
           <Button
             className="w-full font-medium rounded-xl py-6 text-base"
             onClick={handleButtonClick}
             disabled={buttonState.disabled || loading || checkingApproval}
           >
-            {loading || checkingApproval 
-              ? "Loading..." 
-              : buttonState.text}
+            {/* Only show Loading when actively doing something, not during approval checks */}
+            {loading ? "Loading..." : buttonState.text}
           </Button>
           
           {/* Debug info - will remove in production */}
