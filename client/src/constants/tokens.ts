@@ -11,7 +11,7 @@ export const SUPPORTED_TOKENS: Token[] = [
   {
     symbol: 'VUSD',
     name: 'VUSD Stablecoin',
-    address: '0x677ddbd918637E5F2c79e164D402454de7dA8619', // Replace with actual VUSD address
+    address: '0x677ddbd918637E5F2c79e164D402454dE7dA8619',
     decimals: 18
   },
   {

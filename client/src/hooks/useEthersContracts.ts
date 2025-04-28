@@ -16,6 +16,16 @@ import {
   VUSD_ADDRESS 
 } from '@/constants/contracts';
 
+// Get checksummed address
+const getChecksumAddress = (address: string) => {
+  try {
+    return ethers.getAddress(address);
+  } catch (error) {
+    console.error(`Invalid address: ${address}`);
+    return address;
+  }
+};
+
 export const useEthersContracts = () => {
   const { toast } = useToast();
   const { isConnected } = useWeb3();
@@ -33,17 +43,17 @@ export const useEthersContracts = () => {
   const contracts = useMemo(() => {
     try {
       // Read-only contracts
-      const vusdReadOnly = new Contract(VUSD_ADDRESS, VUSD_ABI, getProvider);
-      const minterReadOnly = new Contract(MINTER_ADDRESS, MINTER_ABI, getProvider);
-      const redeemerReadOnly = new Contract(REDEEMER_ADDRESS, REDEEMER_ABI, getProvider);
-      const treasuryReadOnly = new Contract(TREASURY_ADDRESS, TREASURY_ABI, getProvider);
+      const vusdReadOnly = new Contract(getChecksumAddress(VUSD_ADDRESS), VUSD_ABI, getProvider);
+      const minterReadOnly = new Contract(getChecksumAddress(MINTER_ADDRESS), MINTER_ABI, getProvider);
+      const redeemerReadOnly = new Contract(getChecksumAddress(REDEEMER_ADDRESS), REDEEMER_ABI, getProvider);
+      const treasuryReadOnly = new Contract(getChecksumAddress(TREASURY_ADDRESS), TREASURY_ABI, getProvider);
       
       return {
         vusd: vusdReadOnly,
         minter: minterReadOnly,
         redeemer: redeemerReadOnly,
         treasury: treasuryReadOnly,
-        getERC20Contract: (address: string) => new Contract(address, ERC20_ABI, getProvider),
+        getERC20Contract: (address: string) => new Contract(getChecksumAddress(address), ERC20_ABI, getProvider),
       };
     } catch (error) {
       console.error('Error initializing contracts:', error);
@@ -74,11 +84,11 @@ export const useEthersContracts = () => {
       const signer = await provider.getSigner();
       
       return {
-        vusd: new Contract(VUSD_ADDRESS, VUSD_ABI, signer),
-        minter: new Contract(MINTER_ADDRESS, MINTER_ABI, signer),
-        redeemer: new Contract(REDEEMER_ADDRESS, REDEEMER_ABI, signer),
-        treasury: new Contract(TREASURY_ADDRESS, TREASURY_ABI, signer),
-        getERC20Contract: (address: string) => new Contract(address, ERC20_ABI, signer),
+        vusd: new Contract(getChecksumAddress(VUSD_ADDRESS), VUSD_ABI, signer),
+        minter: new Contract(getChecksumAddress(MINTER_ADDRESS), MINTER_ABI, signer),
+        redeemer: new Contract(getChecksumAddress(REDEEMER_ADDRESS), REDEEMER_ABI, signer),
+        treasury: new Contract(getChecksumAddress(TREASURY_ADDRESS), TREASURY_ABI, signer),
+        getERC20Contract: (address: string) => new Contract(getChecksumAddress(address), ERC20_ABI, signer),
       };
     } catch (error) {
       console.error('Error getting connected contracts:', error);
