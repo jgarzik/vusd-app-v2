@@ -50,6 +50,18 @@ export const useWeb3 = () => {
   const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
 
+  /**
+   * Creates user-friendly wallet connector options.
+   * 
+   * @returns {Array} Formatted connector objects with standardized names and IDs
+   * 
+   * @remarks
+   * This memoized function transforms the raw wallet connectors from wagmi into 
+   * a more user-friendly format with consistent naming. It specifically:
+   * - Renames 'injected' to 'MetaMask' for better user recognition
+   * - Ensures WalletConnect has proper capitalization
+   * - Preserves the original connector ID for internal connection logic
+   */
   const formattedConnectors = useMemo(() => {
     return connectors.map((connector) => {
       // Properly identify each connector type
@@ -70,10 +82,26 @@ export const useWeb3 = () => {
     });
   }, [connectors]);
   
+  /**
+   * Return the wallet connection state and functions.
+   * 
+   * @returns {Object} Complete Web3 wallet interface
+   */
   return {
+    // User's wallet address (undefined if not connected)
     address,
+    
+    // Connection state flags
     isConnected,
     isConnecting: isPending,
+    
+    /**
+     * Connect to a specific wallet type by connector ID.
+     * 
+     * @param {string} connectorId - The ID of the connector to use (e.g., 'injected', 'walletConnect')
+     * @returns {Promise} Connection promise from the underlying connector
+     * @throws {Error} If the connector ID is not found
+     */
     connect: (connectorId: string) => {
       const connector = connectors.find(c => c.id === connectorId);
       if (connector) {
@@ -81,7 +109,11 @@ export const useWeb3 = () => {
       }
       throw new Error(`Connector ${connectorId} not found`);
     },
+    
+    // Function to disconnect the current wallet
     disconnect,
+    
+    // Available wallet connection options
     connectors: formattedConnectors,
   };
 };

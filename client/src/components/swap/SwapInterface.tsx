@@ -29,6 +29,23 @@ import { useToast } from "@/hooks/use-toast";
 import { formatAmount, calculateExchangeRate, parseInputAmount } from "@/lib/utils";
 import { SUPPORTED_TOKENS, Token } from "@/constants/tokens";
 
+/**
+ * Main token swap interface component for exchanging between VUSD and stablecoins.
+ * 
+ * @returns {JSX.Element} The Swap interface component
+ * 
+ * @remarks
+ * This component provides the complete UI for VUSD token swapping:
+ * - Bidirectional swapping between VUSD and whitelisted stablecoins (USDC, USDT, DAI)
+ * - Real-time price quotes and fee information
+ * - Balance display for connected wallets
+ * - Transaction status display and error handling
+ * - Token selection interface
+ * 
+ * Under the hood, swapping to VUSD uses the Minter contract with a 0.01% fee,
+ * while swapping from VUSD uses the Redeemer contract with a 0.1% fee.
+ * This implementation detail is abstracted to provide a consistent swap experience.
+ */
 const SwapInterface = () => {
   const { toast } = useToast();
   const { address, isConnected } = useWeb3();
@@ -54,6 +71,12 @@ const SwapInterface = () => {
   const [txStatus, setTxStatus] = useState<"none" | "pending" | "success" | "error">("none");
   const [txHash, setTxHash] = useState("");
   
+  /**
+   * Automatically updates the expected output amount when swap parameters change.
+   * 
+   * This effect triggers a new swap estimation whenever the input amount or
+   * either token selection changes, keeping the output value in sync.
+   */
   useEffect(() => {
     if (inputAmount && inputToken && outputToken) {
       estimateSwap(inputAmount, inputToken, outputToken);
@@ -71,7 +94,23 @@ const SwapInterface = () => {
     // In a real implementation, we would estimate the input based on the output
   };
 
+  /**
+   * Executes the token swap transaction after validating requirements.
+   * 
+   * @async
+   * @returns {Promise<void>} 
+   * 
+   * @remarks
+   * This function handles the entire swap execution process:
+   * 1. Validates wallet connection, input amount, and token balance
+   * 2. Updates transaction UI state to show pending status
+   * 3. Executes the appropriate contract call (mint/redeem) via useSwap
+   * 4. Updates UI with success or error state based on transaction result
+   * 
+   * @throws Displays toast notification with error details if the transaction fails
+   */
   const handleSwap = async () => {
+    // Validate wallet connection
     if (!isConnected) {
       toast({
         title: "Wallet not connected",
@@ -81,6 +120,7 @@ const SwapInterface = () => {
       return;
     }
 
+    // Validate input amount
     if (!inputAmount || inputAmount <= 0) {
       toast({
         title: "Invalid amount",
@@ -90,6 +130,7 @@ const SwapInterface = () => {
       return;
     }
 
+    // Check token balance
     const balance = balances[inputToken];
     if (balance < inputAmount) {
       toast({
@@ -100,6 +141,7 @@ const SwapInterface = () => {
       return;
     }
 
+    // Execute swap transaction
     setTxStatus("pending");
     try {
       const tx = await executeSwap();
@@ -127,6 +169,19 @@ const SwapInterface = () => {
     setShowTokenSelector(true);
   };
 
+  /**
+   * Handles token selection from the TokenSelector modal.
+   * 
+   * @param {Token} token - The token selected by the user
+   * @returns {void}
+   * 
+   * @remarks
+   * This function ensures a consistent token selection experience by:
+   * 1. Determining whether the selection is for input or output side
+   * 2. Automatically swapping tokens if the same token is selected on both sides
+   * 3. Preventing duplicate tokens in the swap interface
+   * 4. Closing the token selector modal after selection
+   */
   const onSelectToken = (token: Token) => {
     if (selectingFor === "input") {
       if (token.symbol === outputToken) {
