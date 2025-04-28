@@ -81,6 +81,20 @@ export const useTreasury = () => {
         'function token1() external view returns (address)',
         'function totalSupply() external view returns (uint256)'
       ]
+    },
+    {
+      address: '0xBf97b59b0DFA5F6A27BfD861e661d6E22E6544de',
+      symbol: 'VUSD/USDC LP',
+      name: 'SushiSwap VUSD/USDC LP',
+      decimals: 18,
+      assetType: AssetType.LP_TOKEN,
+      // ABI for SushiSwap LP specific functions (same as other LP tokens)
+      extraAbi: [
+        'function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)',
+        'function token0() external view returns (address)',
+        'function token1() external view returns (address)',
+        'function totalSupply() external view returns (uint256)'
+      ]
     }
   ];
   
@@ -148,18 +162,49 @@ export const useTreasury = () => {
         const token0Address = await tokenContract.token0();
         const token1Address = await tokenContract.token1();
         
-        // Determine which token is VUSD and which is ETH
-        const vusdReserve = token0Address.toLowerCase() === VUSD_ADDRESS.toLowerCase() ? 
-          reserve0 : reserve1;
-        const ethReserve = token0Address.toLowerCase() === VUSD_ADDRESS.toLowerCase() ? 
-          reserve1 : reserve0;
+        // Get the addresses in lowercase for comparison
+        const token0AddressLower = token0Address.toLowerCase();
+        const token1AddressLower = token1Address.toLowerCase();
+        const vusdAddressLower = VUSD_ADDRESS.toLowerCase();
         
-        // Calculate value of owned reserves using the ownership ratio
-        const ownedVusd = parseFloat(ethers.formatUnits(vusdReserve, 18)) * ownershipRatio;
-        const ownedEth = parseFloat(ethers.formatUnits(ethReserve, 18)) * ownershipRatio;
+        // USDC address (commonly found in LP pairs)
+        const usdcAddressLower = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'.toLowerCase();
         
-        // Calculate total value (VUSD is 1:1 with USD, ETH uses current price)
-        value = ownedVusd + (ownedEth * ethPrice);
+        // Determine token types and values based on the pair
+        if (token0AddressLower === vusdAddressLower || token1AddressLower === vusdAddressLower) {
+          // This is a VUSD pair
+          const vusdReserve = token0AddressLower === vusdAddressLower ? reserve0 : reserve1;
+          const otherTokenReserve = token0AddressLower === vusdAddressLower ? reserve1 : reserve0;
+          const otherTokenAddress = token0AddressLower === vusdAddressLower ? token1AddressLower : token0AddressLower;
+          
+          // Calculate owned VUSD (always 1:1 with USD)
+          const ownedVusd = parseFloat(ethers.formatUnits(vusdReserve, 18)) * ownershipRatio;
+          
+          let ownedOtherValue = 0;
+          
+          if (otherTokenAddress === usdcAddressLower) {
+            // USDC pair - stablecoin is 1:1 with USD, but has 6 decimals
+            ownedOtherValue = parseFloat(ethers.formatUnits(otherTokenReserve, 6)) * ownershipRatio;
+          } else if (otherTokenAddress === '0xdac17f958d2ee523a2206206994597c13d831ec7'.toLowerCase()) {
+            // USDT pair - stablecoin is 1:1 with USD, but has 6 decimals
+            ownedOtherValue = parseFloat(ethers.formatUnits(otherTokenReserve, 6)) * ownershipRatio;
+          } else if (otherTokenAddress === '0x6b175474e89094c44da98b954eedeac495271d0f'.toLowerCase()) {
+            // DAI pair - stablecoin is 1:1 with USD, has 18 decimals
+            ownedOtherValue = parseFloat(ethers.formatUnits(otherTokenReserve, 18)) * ownershipRatio;
+          } else {
+            // Assume it's ETH or an ETH-like token
+            ownedOtherValue = parseFloat(ethers.formatUnits(otherTokenReserve, 18)) * ownershipRatio * ethPrice;
+          }
+          
+          // Total value is the sum of both sides
+          value = ownedVusd + ownedOtherValue;
+        } else {
+          // Not a VUSD pair, use default valuation
+          // This is a simplified approach and should be expanded with more token prices
+          const reserve0Value = parseFloat(ethers.formatUnits(reserve0, 18)) * ownershipRatio;
+          const reserve1Value = parseFloat(ethers.formatUnits(reserve1, 18)) * ownershipRatio;
+          value = (reserve0Value + reserve1Value) * ethPrice / 2;
+        }
       } catch (error) {
         console.error('Error calculating LP token value:', error);
       }
