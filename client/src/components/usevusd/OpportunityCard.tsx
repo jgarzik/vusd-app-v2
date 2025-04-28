@@ -2,6 +2,21 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * OpportunityCard.tsx - Individual DeFi opportunity card
+ * 
+ * This component renders a single card representing a DeFi opportunity 
+ * where users can utilize their VUSD tokens. Key features:
+ * - Visual representation with a colored icon
+ * - Clear title and description of the opportunity
+ * - Context-aware call-to-action button (e.g., "Add Liquidity", "Trade Now")
+ * - External link to the respective platform
+ * 
+ * The component dynamically selects an appropriate CTA text based on the
+ * opportunity type (lending, trading, liquidity provision, etc.) to
+ * provide more specific guidance to users.
+ */
+
 import { ExternalLink } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { ExternalLink as ExternalLinkType } from "@/constants/externalLinks";

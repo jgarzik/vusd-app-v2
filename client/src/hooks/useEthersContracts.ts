@@ -2,6 +2,23 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * useEthersContracts.ts - Smart contract interaction hook
+ * 
+ * This hook provides access to the core VUSD protocol smart contracts:
+ * - VUSD: The main stablecoin token contract
+ * - Minter: Handles minting of VUSD when users swap to VUSD
+ * - Redeemer: Handles redemption of VUSD when users swap from VUSD
+ * - Treasury: Manages collateral assets and token reserves
+ * 
+ * The hook also provides utility functions to:
+ * - Create contract instances for any ERC20 token
+ * - Handle wallet connection state
+ * - Provide proper error handling for contract interactions
+ * 
+ * All contract instances are memoized for performance.
+ */
+
 import { useMemo } from 'react';
 import { Contract, ethers } from 'ethers';
 import { useWeb3 } from './useWeb3';

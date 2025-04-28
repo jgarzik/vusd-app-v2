@@ -2,6 +2,20 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * ConnectWallet.tsx - Wallet connection component
+ * 
+ * This component handles Ethereum wallet connections for the VUSD application:
+ * - Displays a connection button when not connected
+ * - Shows wallet address and balance when connected
+ * - Provides a wallet selector modal with different connection options
+ * - Handles connection errors with toast notifications
+ * - Offers a dropdown menu for wallet actions (copy address, disconnect)
+ * 
+ * The component supports multiple wallet types through the useWeb3 hook,
+ * including MetaMask and WalletConnect, with appropriate icons for each.
+ */
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';

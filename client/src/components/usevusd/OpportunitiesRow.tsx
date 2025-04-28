@@ -2,6 +2,23 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * OpportunitiesRow.tsx - VUSD opportunity cards container
+ * 
+ * This component displays a horizontal row of opportunity cards that
+ * showcase different ways to use VUSD in the DeFi ecosystem:
+ * - Trading platforms
+ * - Yield farming opportunities
+ * - Lending markets
+ * - Liquidity pools
+ * 
+ * Features:
+ * - Responsive grid layout that adjusts based on screen size
+ * - Optional "View All" link to the UseVUSD page
+ * - Configurable maximum number of cards to display
+ * - Consistent styling across all opportunity cards
+ */
+
 import { Link } from "wouter";
 import { externalLinks } from "@/constants/externalLinks";
 import OpportunityCard from "./OpportunityCard";
