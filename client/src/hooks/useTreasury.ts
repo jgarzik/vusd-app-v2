@@ -29,20 +29,20 @@ export const useTreasury = () => {
   
   const [loading, setLoading] = useState(true);
   const [treasuryData, setTreasuryData] = useState<TreasuryData>({
-    totalValue: 5371834,
+    totalValue: 4721834,
     t1Value: 4521834,
-    t2Value: 850000,
+    t2Value: 200000,
     circulatingSupply: 4500000,
-    collateralizationRatio: 1.194,
-    excessValue: 871834,
+    collateralizationRatio: 1.049,
+    excessValue: 221834,
     t1Assets: [
       { symbol: 'USDC', name: 'USD Coin', value: 2105322, balance: 2105322, address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' },
       { symbol: 'DAI', name: 'Dai Stablecoin', value: 1826409, balance: 1826409, address: '0x6B175474E89094C44Da98b954EedeAC495271d0F' },
       { symbol: 'USDT', name: 'Tether USD', value: 590103, balance: 590103, address: '0xdAC17F958D2ee523a2206206994597C13D831ec7' }
     ],
     t2Assets: [
-      { symbol: 'stETH', name: 'Lido Staked ETH', value: 500000, balance: 500000, address: '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84' },
-      { symbol: 'VUSD/ETH LP', name: 'SushiSwap VUSD/ETH LP', value: 350000, balance: 350000, address: '0xb90047676cC13e68632c55cB5b7cBd8A4C5A0A8E' }
+      { symbol: 'stETH', name: 'Lido Staked ETH', value: 125000, balance: 125000, address: '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84' },
+      { symbol: 'VUSD/ETH LP', name: 'SushiSwap VUSD/ETH LP', value: 75000, balance: 75000, address: '0xb90047676cC13e68632c55cB5b7cBd8A4C5A0A8E' }
     ]
   });
   
@@ -53,14 +53,14 @@ export const useTreasury = () => {
       symbol: 'stETH',
       name: 'Lido Staked ETH',
       decimals: 18,
-      estimated_value: 500000 // Placeholder value in USD
+      estimated_value: 125000 // Placeholder value in USD
     },
     {
       address: '0xb90047676cC13e68632c55cB5b7cBd8A4C5A0A8E',
       symbol: 'VUSD/ETH LP',
       name: 'SushiSwap VUSD/ETH LP',
       decimals: 18,
-      estimated_value: 350000 // Placeholder value in USD
+      estimated_value: 75000 // Placeholder value in USD
     }
   ];
 
@@ -108,18 +108,54 @@ export const useTreasury = () => {
         }
       }
       
-      // Add T2 assets (non-whitelisted assets) - in a real implementation,
-      // you would use an external API or service to get this data
+      // Add T2 assets (non-whitelisted assets)
+      // In production, we would query the blockchain for these token balances
       for (const t2Asset of T2_ASSETS) {
-        t2Assets.push({
-          symbol: t2Asset.symbol,
-          name: t2Asset.name,
-          value: t2Asset.estimated_value,
-          balance: t2Asset.estimated_value, // Using estimated value as balance for simplicity
-          address: t2Asset.address
-        });
-        
-        t2Value += t2Asset.estimated_value;
+        try {
+          // Create an ERC20 contract instance for the token
+          const tokenContract = new ethers.Contract(
+            t2Asset.address,
+            [
+              'function balanceOf(address owner) view returns (uint256)',
+              'function decimals() view returns (uint8)'
+            ],
+            new ethers.providers.JsonRpcProvider(process.env.ETHEREUM_RPC_URL)
+          );
+          
+          // For demonstration purposes, we're still using the hardcoded values
+          // In production, we would uncomment this code:
+          /*
+          // Get the token balance of the treasury
+          const balance = await tokenContract.balanceOf(contracts.treasury.target);
+          
+          // Get the token decimals if not known
+          const decimals = t2Asset.decimals || await tokenContract.decimals();
+          
+          // Convert to a readable format
+          const formattedBalance = parseFloat(ethers.formatUnits(balance, decimals));
+          
+          // For non-stablecoin assets, we would need a price oracle to get the USD value
+          // For this example, we're assuming a fixed price
+          const pricePerToken = t2Asset.symbol === 'stETH' ? 3500 : 1; // Example price
+          const value = formattedBalance * pricePerToken;
+          */
+          
+          // Using hardcoded values for now
+          const value = t2Asset.estimated_value;
+          const balance = value; // Assuming 1:1 for simplicity
+          
+          t2Assets.push({
+            symbol: t2Asset.symbol,
+            name: t2Asset.name,
+            value,
+            balance,
+            address: t2Asset.address
+          });
+          
+          t2Value += value;
+        } catch (error) {
+          console.error(`Error fetching T2 asset ${t2Asset.symbol}:`, error);
+        }
       }
       
       // Calculate total value and collateralization ratio

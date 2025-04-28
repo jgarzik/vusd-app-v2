@@ -7,7 +7,7 @@ const Swap = () => {
     <div className="container mx-auto px-4">
       <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto">
         {/* Left column - Swap Interface */}
-        <div className="w-full lg:w-7/12">
+        <div className="w-full lg:w-8/12">
           <SwapInterface />
           
           {/* External Links Card - Only visible on larger screens */}
@@ -17,8 +17,8 @@ const Swap = () => {
         </div>
         
         {/* Right column - Treasury Analytics */}
-        <div className="w-full lg:w-5/12 lg:mt-0">
-          <div className="sticky top-24">
+        <div className="w-full lg:w-4/12 lg:mt-0">
+          <div className="sticky top-24 max-w-xs mx-auto lg:mx-0">
             <TreasuryCard previewMode={true} />
           </div>
         </div>

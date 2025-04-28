@@ -67,13 +67,28 @@ const Analytics = () => {
             <CardDescription>Distribution of assets in the VUSD treasury</CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm font-medium text-gray-300">T1 (Whitelisted Stablecoins)</div>
+                <div className="text-sm font-medium">{formatCurrency(treasuryData.t1Value)}</div>
+              </div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm font-medium text-gray-300">T2 (Other Assets)</div>
+                <div className="text-sm font-medium">{formatCurrency(treasuryData.t2Value)}</div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium text-gray-300">Excess Value</div>
+                <div className="text-sm font-medium text-green-500">+{formatCurrency(treasuryData.excessValue)}</div>
+              </div>
+            </div>
+            
             {loading ? (
-              <div className="h-[300px] flex items-center justify-center">Loading...</div>
+              <div className="h-[250px] flex items-center justify-center">Loading...</div>
             ) : (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
-                    data={treasuryData.assets}
+                    data={[...treasuryData.t1Assets, ...treasuryData.t2Assets]}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
@@ -83,7 +98,7 @@ const Analytics = () => {
                     nameKey="symbol"
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   >
-                    {treasuryData.assets.map((entry, index) => (
+                    {[...treasuryData.t1Assets, ...treasuryData.t2Assets].map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
@@ -95,7 +110,49 @@ const Analytics = () => {
           </CardContent>
         </Card>
         
-        <TreasuryCard />
+        <Card>
+          <CardHeader>
+            <CardTitle>Treasury Assets Detail</CardTitle>
+            <CardDescription>Whitelisted and non-whitelisted assets in the treasury</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm text-blue-500 font-medium mb-2">T1 Assets (Whitelisted Stablecoins)</h3>
+                <div className="space-y-2">
+                  {treasuryData.t1Assets.map((asset) => (
+                    <div key={asset.symbol} className="flex justify-between items-center p-2 bg-background-light rounded-lg">
+                      <div className="flex items-center">
+                        <div className={`w-6 h-6 rounded-full mr-2 flex items-center justify-center bg-blue-900 text-xs`}>
+                          {asset.symbol.substring(0, 1)}
+                        </div>
+                        <span>{asset.name}</span>
+                      </div>
+                      <div>{formatCurrency(asset.value)}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-sm text-purple-500 font-medium mb-2">T2 Assets (Non-whitelisted)</h3>
+                <div className="space-y-2">
+                  {treasuryData.t2Assets.map((asset) => (
+                    <div key={asset.symbol} className="flex justify-between items-center p-2 bg-background-light rounded-lg">
+                      <div className="flex items-center">
+                        <div className={`w-6 h-6 rounded-full mr-2 flex items-center justify-center bg-purple-900 text-xs`}>
+                          {asset.symbol.substring(0, 1)}
+                        </div>
+                        <span>{asset.name}</span>
+                      </div>
+                      <div>{formatCurrency(asset.value)}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
       
       <Card>
