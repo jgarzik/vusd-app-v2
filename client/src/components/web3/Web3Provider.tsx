@@ -27,15 +27,6 @@ import { injected, walletConnect } from 'wagmi/connectors';
 // Initial query client for data fetching
 const queryClient = new QueryClient();
 
-// Set up the wagmi config with Ethereum mainnet
-// Use the current deployed URL instead of a hardcoded one to prevent WalletConnect warnings
-const metadata = {
-  name: 'VUSD Application',
-  description: 'Swap to or from the VUSD stablecoin',
-  url: 'https://vusd-hub.replit.app', // Current Replit deployment URL
-  icons: ['https://avatars.githubusercontent.com/u/37784886']
-};
-
 interface Web3ProviderProps {
   children: React.ReactNode;
 }
@@ -49,6 +40,7 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
     const initializeWeb3 = async () => {
       try {
         setIsLoading(true);
+        
         // Fetch configuration from backend
         const response = await fetch('/api/config');
         const data = await response.json();
@@ -64,6 +56,14 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
           console.warn('Infura ID is missing. Using default RPC provider, which may have rate limits.');
         }
         
+        // Get dynamic metadata with current URL
+        const metadata = {
+          name: 'VUSD Application',
+          description: 'Swap to or from the VUSD stablecoin',
+          url: window.location.origin,
+          icons: ['https://avatars.githubusercontent.com/u/37784886']
+        };
+        
         // Create wagmi config with Infura provider
         const config = createConfig({
           chains: [mainnet],
@@ -76,18 +76,7 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
             injected({ target: 'metaMask' }),
             walletConnect({ 
               projectId, 
-              metadata, 
-              relayUrl: 'wss://relay.walletconnect.org',
-              // Use Infura for WalletConnect RPC if available
-              options: {
-                projectId,
-                metadata,
-                ...(infuraId ? { 
-                  rpcMap: { 
-                    [mainnet.id]: `https://mainnet.infura.io/v3/${infuraId}` 
-                  } 
-                } : {})
-              }
+              metadata
             })
           ],
         });
