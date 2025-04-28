@@ -1,3 +1,21 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
+/**
+ * index.css - Global application styles and theming
+ *
+ * This file defines the global styles and design system for the VUSD application.
+ * Key features:
+ * - Tailwind CSS integration with base, components, and utilities
+ * - Custom color palette with primary blue accent for VUSD branding
+ * - Dark theme configuration with proper contrast ratios
+ * - Custom component styling for consistent UI appearance
+ * - Responsive design utilities for various screen sizes
+ * 
+ * The color system uses CSS variables with HSL format for easy theme adjustments.
+ */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
