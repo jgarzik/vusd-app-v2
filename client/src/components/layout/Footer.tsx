@@ -25,28 +25,12 @@ const Footer = () => {
               Docs
             </a>
             <a 
-              href="https://github.com" 
+              href="https://github.com/hemilabs/vusd-stablecoin" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="text-gray-400 hover:text-white"
             >
               GitHub
-            </a>
-            <a 
-              href="https://twitter.com" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-gray-400 hover:text-white"
-            >
-              Twitter
-            </a>
-            <a 
-              href="https://discord.com" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-gray-400 hover:text-white"
-            >
-              Discord
             </a>
           </div>
         </div>
