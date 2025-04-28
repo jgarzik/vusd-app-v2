@@ -437,6 +437,7 @@ export const useSwap = () => {
    * - For 'fromVUSD': Approves the Redeemer contract to spend VUSD
    * 
    * It uses MaxUint256 as the approval amount to avoid needing multiple approvals.
+   * After approval completes, it automatically sets needsApproval to false without rechecking.
    */
   const approveTokens = useCallback(async () => {
     if (!isConnected || !address) {
@@ -481,75 +482,90 @@ export const useSwap = () => {
     getConnectedContracts
   ]);
 
-  // Manually check approval status - without causing infinite loops
+  // Run approval check only when specific inputs change, with debounce to prevent infinite loops
   useEffect(() => {
-    let isMounted = true; // Track if component is mounted
+    // Prevent unnecessary checks
+    if (!isConnected || !address || !inputAmount || inputAmount <= 0) {
+      setNeedsApproval(false);
+      setCheckingApproval(false);
+      return;
+    }
 
-    // Create a dedicated approval checking function that doesn't depend on the hook variables
-    const checkForApproval = async () => {
-      if (!isMounted) return;
-      if (!isConnected || !address || !inputAmount || inputAmount <= 0) {
-        if (isMounted) {
-          setNeedsApproval(false);
-          setCheckingApproval(false);
-        }
-        return;
-      }
-
+    // Flag to track async operation
+    let isActive = true;
+    
+    // Track approval check to prevent redundant calls
+    let approvalCheckTimeout: NodeJS.Timeout | null = null;
+    
+    const runApprovalCheck = async () => {
+      // Don't run if there's already a check in progress
+      if (checkingApproval) return;
+      
       try {
-        if (isMounted) setCheckingApproval(true);
+        console.log('Starting approval check...');
+        setCheckingApproval(true);
         
-        // Manually check based on current input values
+        // Snapshot current values to avoid closure issues
+        const currentInputAmount = inputAmount;
+        const currentInputToken = inputToken;
+        const currentOutputToken = outputToken;
+        
+        // Manually check if approval is needed
         const connectedContracts = await getConnectedContracts();
         let isApprovalRequired = false;
         
-        const direction = outputToken === 'VUSD' ? 'toVUSD' : 'fromVUSD';
+        const direction = currentOutputToken === 'VUSD' ? 'toVUSD' : 'fromVUSD';
         
         if (direction === 'toVUSD') {
           // Check approval for input token -> Minter
-          const inputTokenAddress = getTokenAddress(inputToken);
-          const inputTokenContract = connectedContracts.getERC20Contract(inputTokenAddress);
-          const inputDecimals = getTokenDecimals(inputToken);
-          const amount = ethers.parseUnits(inputAmount.toString(), inputDecimals);
+          const tokenAddress = getTokenAddress(currentInputToken);
+          const tokenContract = connectedContracts.getERC20Contract(tokenAddress);
+          const decimals = getTokenDecimals(currentInputToken);
+          const amount = ethers.parseUnits(currentInputAmount.toString(), decimals);
           
-          const allowance = await inputTokenContract.allowance(address, connectedContracts.minter.target);
+          const allowance = await tokenContract.allowance(address, connectedContracts.minter.target);
           isApprovalRequired = allowance < amount;
         } else {
           // Check approval for VUSD -> Redeemer
-          const amount = ethers.parseUnits(inputAmount.toString(), 18); // VUSD has 18 decimals
+          const amount = ethers.parseUnits(currentInputAmount.toString(), 18);
           const allowance = await connectedContracts.vusd.allowance(address, connectedContracts.redeemer.target);
           isApprovalRequired = allowance < amount;
         }
         
-        console.log('Single approval check result:', isApprovalRequired);
+        console.log(`Approval check for ${currentInputAmount} ${currentInputToken} result:`, isApprovalRequired);
         
-        // Only update state if still mounted
-        if (isMounted) {
+        // Only update if the component is still mounted and values haven't changed
+        if (isActive && 
+            currentInputAmount === inputAmount && 
+            currentInputToken === inputToken && 
+            currentOutputToken === outputToken) {
           setNeedsApproval(isApprovalRequired);
-          setCheckingApproval(false);
         }
       } catch (error) {
-        console.error('Error in approval check:', error);
-        if (isMounted) {
-          setNeedsApproval(false);
-          setCheckingApproval(false);
-        }
+        console.error('Error checking approval:', error);
+        if (isActive) setNeedsApproval(false);
+      } finally {
+        if (isActive) setCheckingApproval(false);
       }
     };
     
-    // Only run once when these values change - not on every render!
-    checkForApproval();
+    // Use debounced check to avoid rapid rechecking
+    approvalCheckTimeout = setTimeout(runApprovalCheck, 300);
     
-    // Cleanup function
+    // Clean up
     return () => {
-      isMounted = false;
+      isActive = false;
+      if (approvalCheckTimeout) clearTimeout(approvalCheckTimeout);
     };
   }, [
+    // Only re-run approval check when these key values change
     isConnected, 
     address,
-    inputAmount, 
+    inputAmount,
     inputToken, 
     outputToken,
+    checkingApproval,
+    // Include necessary functions, but this shouldn't create circular dependencies
     getConnectedContracts,
     getTokenAddress,
     getTokenDecimals
