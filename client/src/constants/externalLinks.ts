@@ -2,6 +2,20 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * externalLinks.ts - External DeFi platform links
+ * 
+ * This module defines all external platforms where VUSD can be utilized.
+ * It provides structured data for each opportunity including:
+ * - Title: Name of the platform or opportunity
+ * - Description: Short explanation of what users can do
+ * - URL: Direct link to the relevant page on the external platform
+ * - Icon styling: Visual representation for the opportunity cards
+ * 
+ * These links are used in the OpportunityCard and OpportunitiesRow components
+ * to show users where they can use their VUSD tokens in the DeFi ecosystem.
+ */
+
 export interface ExternalLink {
   title: string;
   description: string;

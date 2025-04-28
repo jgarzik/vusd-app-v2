@@ -2,6 +2,21 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * use-toast.ts - Toast notification system hook
+ * 
+ * This module provides a global toast notification system for the application.
+ * Key features:
+ * - Creation of toast notifications with customizable content and styling
+ * - Management of toast queue with proper timing and limits
+ * - Support for different toast variants (default, destructive, etc.)
+ * - Action buttons within toast notifications
+ * - Programmatic toast dismissal
+ * 
+ * The implementation uses React's reducer pattern for state management,
+ * ensuring consistent behavior across the application.
+ */
+
 import * as React from "react"
 
 import type {
