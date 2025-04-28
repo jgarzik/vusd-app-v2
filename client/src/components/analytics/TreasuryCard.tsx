@@ -28,9 +28,35 @@ interface TreasuryCardProps {
   previewMode?: boolean;
 }
 
+/**
+ * Component that displays VUSD treasury statistics and asset breakdowns.
+ * 
+ * @param {TreasuryCardProps} props - Component properties
+ * @param {boolean} [props.previewMode=false] - Whether to display in compact preview mode
+ * @returns {JSX.Element} The TreasuryCard component
+ * 
+ * @remarks
+ * This component displays key treasury metrics in a responsive card format:
+ * - Excess value (treasury value beyond VUSD supply)
+ * - Collateralization ratio with visual indicator
+ * - Breakdown of T1 assets (whitelisted stablecoins)
+ * - Breakdown of T2 assets (non-whitelisted assets like stETH, LP tokens)
+ * 
+ * The component has two display modes:
+ * - Full mode (default): Shows complete details
+ * - Preview mode: Shows a condensed version with a "View More" link to the analytics page
+ * 
+ * All monetary values are formatted consistently using the formatCurrency utility.
+ */
 const TreasuryCard = ({ previewMode = false }: TreasuryCardProps) => {
   const { treasuryData, loading } = useTreasury();
   
+  /**
+   * Returns the appropriate CSS class for token icons based on token symbol.
+   * 
+   * @param {string} symbol - The token symbol (e.g., "USDC", "VUSD")
+   * @returns {string} CSS class string for styling the token icon
+   */
   const getTokenIconClass = (symbol: string) => {
     switch(symbol) {
       case 'USDC': return 'token-icon-usdc';

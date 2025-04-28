@@ -31,6 +31,25 @@ interface TokenSelectorProps {
   excludeToken?: string;
 }
 
+/**
+ * Modal component for selecting tokens during swap operations.
+ * 
+ * @param {TokenSelectorProps} props - Component properties
+ * @param {boolean} props.isOpen - Whether the modal is open
+ * @param {() => void} props.onClose - Function to call when closing the modal
+ * @param {(token: Token) => void} props.onSelectToken - Callback for when a token is selected
+ * @param {Record<string, number>} props.balances - Current token balances for the connected wallet
+ * @param {string} [props.excludeToken] - Token symbol to exclude from the selection list
+ * @returns {JSX.Element} The TokenSelector modal
+ * 
+ * @remarks
+ * This component provides a searchable dialog for selecting tokens during swap operations.
+ * It shows each token's balance for the connected wallet, allows filtering by name or
+ * symbol, and prevents selecting the token that's already chosen on the other side of the
+ * swap interface.
+ * 
+ * The component uses the Dialog component from shadcn/ui for accessibility and responsive behavior.
+ */
 const TokenSelector = ({
   isOpen,
   onClose,
@@ -41,12 +60,25 @@ const TokenSelector = ({
   const { isConnected } = useWeb3();
   const [searchTerm, setSearchTerm] = useState("");
   
+  /**
+   * Filters tokens based on search term and excluded token.
+   * 
+   * This filtering:
+   * 1. Removes any token that matches the excludeToken prop
+   * 2. Includes tokens whose symbol or name match the search term (case insensitive)
+   */
   const filteredTokens = SUPPORTED_TOKENS.filter(token => 
     token.symbol !== excludeToken && 
     (token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) || 
      token.name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
   
+  /**
+   * Returns the appropriate CSS class for token icons based on token symbol.
+   * 
+   * @param {string} symbol - The token symbol (e.g., "USDC", "VUSD")
+   * @returns {string} CSS class string for styling the token icon
+   */
   const getTokenIconClass = (symbol: string) => {
     switch(symbol) {
       case 'USDC': return 'token-icon-usdc';

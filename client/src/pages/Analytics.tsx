@@ -37,9 +37,27 @@ import { useTreasury } from "@/hooks/useTreasury";
 import { formatCurrency } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 
+/**
+ * Analytics component for visualizing VUSD treasury data.
+ * 
+ * @returns {JSX.Element} The Analytics page component
+ * 
+ * @remarks
+ * This component provides a comprehensive dashboard for VUSD treasury analytics including:
+ * - Key metrics: Treasury value, circulating supply, and collateralization ratio
+ * - Visual breakdowns of treasury composition through interactive charts
+ * - Detailed listings of both T1 assets (whitelisted stablecoins) and T2 assets (other)
+ * 
+ * The visualizations use a consistent color scheme to differentiate between asset types:
+ * - Blue gradient for T1 assets (whitelisted stablecoins)
+ * - Green gradient for T2 assets (other treasury holdings)
+ * 
+ * All monetary values are formatted consistently using the formatCurrency utility.
+ */
 const Analytics = () => {
   const { treasuryData, loading } = useTreasury();
   
+  // Color constants for consistent visual styling
   const COLORS = ['#3B82F6', '#F59E0B', '#10B981', '#6366F1'];
   const T1_COLOR = '#3B82F6';
   const T2_COLOR = '#10B981';
