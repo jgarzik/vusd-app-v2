@@ -2,6 +2,21 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * SwapInterface.tsx - Main token swap UI component
+ * 
+ * This component provides the primary user interface for swapping between VUSD and other stablecoins.
+ * It integrates with the useSwap hook to provide:
+ * - Token selection (input/output) with balance display
+ * - Amount input with real-time price quotes
+ * - Token swap direction toggle
+ * - Exchange rate and fee display
+ * - Swap execution button with appropriate error handling
+ * - Transaction status modal showing pending/success/error states
+ * 
+ * The interface abstracts the underlying mint/redeem contract operations to present a unified "swap" experience.
+ */
+
 import { useState, useEffect } from "react";
 import { ArrowDown } from "lucide-react";
 import TokenSelector from "./TokenSelector";

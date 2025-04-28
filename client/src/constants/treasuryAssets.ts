@@ -2,6 +2,22 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * treasuryAssets.ts - Treasury asset type definitions and configurations
+ * 
+ * This module defines all asset types held in the VUSD treasury and their specific properties.
+ * It categorizes assets into:
+ * 
+ * - T1 Assets: High-quality stablecoins (USDC, USDT, DAI) that are directly 1:1 convertible with VUSD
+ * - T2 Assets: Secondary assets that require special valuation methods:
+ *   - Staked ETH (Lido's stETH) with exchange rate conversion
+ *   - LP tokens with complex valuation based on reserve ratios
+ *   - Generic ERC20 tokens
+ * 
+ * Each asset type includes the necessary ABI fragments for blockchain interaction and valuation.
+ * The module also provides helper functions to look up assets by address or symbol.
+ */
+
 // Types of assets in the treasury
 export enum AssetType {
   STAKED_ETH,

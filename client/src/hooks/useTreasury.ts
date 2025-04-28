@@ -2,6 +2,22 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * useTreasury.ts - Treasury data processing and valuation hook
+ * 
+ * This module is responsible for processing and calculating the value of all assets in the VUSD treasury.
+ * It implements specialized asset valuation logic for different asset types:
+ * - T1 Assets: Whitelisted stablecoins (USDC, USDT, DAI) at 1:1 value with USD
+ * - T2 Assets: Non-whitelisted assets like stETH and LP tokens with custom valuation logic
+ * 
+ * The treasury data provides key metrics like:
+ * - Total value of assets in the treasury
+ * - Collateralization ratio of VUSD
+ * - Breakdown of T1 and T2 assets
+ * 
+ * When LP tokens include VUSD, only the non-VUSD side is counted to avoid double-counting.
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
 import { useEthersContracts } from './useEthersContracts';

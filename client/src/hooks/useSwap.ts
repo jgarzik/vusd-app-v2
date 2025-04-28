@@ -2,6 +2,23 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * useSwap.ts - VUSD swap functionality hook
+ * 
+ * This module handles the token swapping interface between VUSD and other stablecoins.
+ * It manages two distinct operations presented as a unified "swap" interface:
+ * - "To VUSD": Uses the Minter contract with 0.01% fee
+ * - "From VUSD": Uses the Redeemer contract with 0.1% fee
+ * 
+ * Key features:
+ * - Real-time balance updates for the connected wallet
+ * - Token approval management for ERC20 allowances
+ * - Slippage-free swap execution with fixed fees
+ * - Transaction status tracking and error handling
+ * 
+ * Only whitelisted stablecoins (USDC, USDT, DAI) can be swapped with VUSD.
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
 import { useWeb3 } from './useWeb3';
