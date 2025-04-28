@@ -68,6 +68,8 @@ export const useSwap = () => {
   const [outputAmount, setOutputAmount] = useState<number>(0);
   const [fee, setFee] = useState<number>(0.003); // Default 0.3% fee
   const [loading, setLoading] = useState<boolean>(false);
+  const [needsApproval, setNeedsApproval] = useState<boolean>(false);
+  const [checkingApproval, setCheckingApproval] = useState<boolean>(false);
   
   /**
    * Retrieves the number of decimal places for a given token symbol.

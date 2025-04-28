@@ -17,7 +17,8 @@
  */
 
 import { useMemo } from 'react';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, useChainId } from 'wagmi';
+import { mainnet } from 'wagmi/chains';
 
 /**
  * Custom hook providing wallet connectivity and state for the application.
@@ -49,6 +50,7 @@ export const useWeb3 = () => {
   const { address, isConnected } = useAccount();
   const { connect, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
+  const chainId = useChainId();
 
   /**
    * Creates user-friendly wallet connector options.
@@ -87,6 +89,15 @@ export const useWeb3 = () => {
    * 
    * @returns {Object} Complete Web3 wallet interface
    */
+  /**
+   * Checks if the connected wallet is on Ethereum mainnet (chain ID 1).
+   * 
+   * @returns {boolean} True if the wallet is connected to mainnet, false otherwise
+   */
+  const isMainnet = useMemo(() => {
+    return chainId === mainnet.id;
+  }, [chainId]);
+
   return {
     // User's wallet address (undefined if not connected)
     address,
@@ -94,6 +105,10 @@ export const useWeb3 = () => {
     // Connection state flags
     isConnected,
     isConnecting: isPending,
+    
+    // Chain information
+    chainId,
+    isMainnet,
     
     /**
      * Connect to a specific wallet type by connector ID.
@@ -115,5 +130,11 @@ export const useWeb3 = () => {
     
     // Available wallet connection options
     connectors: formattedConnectors,
+    
+    /**
+     * Requested network information
+     */
+    requiredChainId: mainnet.id,
+    requiredChainName: 'Ethereum Mainnet',
   };
 };
