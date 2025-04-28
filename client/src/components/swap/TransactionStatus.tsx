@@ -119,12 +119,12 @@ const TransactionStatus = ({
                   </span>
                 </div>
                 <div>
-                  <div className="font-medium">{formatAmount(fromAmount)} {fromToken.symbol}</div>
+                  <div className="font-medium">{formatAmount(fromAmount, fromToken.decimals, true)} {fromToken.symbol}</div>
                 </div>
               </div>
               <div className="flex items-center">
                 <div>
-                  <div className="font-medium">{formatAmount(toAmount)} {toToken.symbol}</div>
+                  <div className="font-medium">{formatAmount(toAmount, toToken.decimals, true)} {toToken.symbol}</div>
                 </div>
                 <div className={`w-8 h-8 rounded-full overflow-hidden ${getTokenIconClass(toToken.symbol)} ml-3 flex items-center justify-center`}>
                   <span className="font-bold text-white">

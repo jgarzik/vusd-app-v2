@@ -10,17 +10,17 @@ export function shortenAddress(address: string): string {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
-export function formatAmount(amount: number | string, decimals: number = 2): string {
+export function formatAmount(amount: number | string, decimals: number = 2, forceMaxPrecision: boolean = false): string {
   if (!amount) return "0";
   const num = typeof amount === "string" ? parseFloat(amount) : amount;
   
-  if (num < 0.01) {
+  if (num < 0.01 && !forceMaxPrecision) {
     return "<0.01";
   }
   
   return num.toLocaleString(undefined, {
     minimumFractionDigits: 2,
-    maximumFractionDigits: decimals
+    maximumFractionDigits: forceMaxPrecision ? decimals : Math.min(decimals, 6)
   });
 }
 
@@ -56,11 +56,12 @@ export function calculateExchangeRate(
   fromAmount: number, 
   toAmount: number, 
   fromToken: string, 
-  toToken: string
+  toToken: string,
+  maxDecimals: number = 6
 ): string {
   if (!fromAmount || !toAmount) return `1 ${fromToken} = - ${toToken}`;
   const rate = toAmount / fromAmount;
-  return `1 ${fromToken} = ${rate.toFixed(3)} ${toToken}`;
+  return `1 ${fromToken} = ${rate.toFixed(maxDecimals)} ${toToken}`;
 }
 
 export async function copyToClipboard(text: string): Promise<void> {

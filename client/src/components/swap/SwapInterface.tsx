@@ -162,7 +162,7 @@ const SwapInterface = () => {
             <div className="flex justify-between items-center mb-2">
               <label className="text-sm text-gray-400">From</label>
               <div className="text-sm text-gray-400">
-                Balance: <span>{isConnected ? formatAmount(balances[inputToken] || 0) : "-"}</span>
+                Balance: <span>{isConnected ? formatAmount(balances[inputToken] || 0, getTokenDecimals(inputToken)) : "-"}</span>
               </div>
             </div>
             
