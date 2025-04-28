@@ -11,6 +11,15 @@ interface OpportunityCardProps {
 }
 
 const OpportunityCard = ({ link }: OpportunityCardProps) => {
+  // Get appropriate action text based on the link description
+  let actionText = "Add Liquidity";
+  
+  if (link.description.toLowerCase().includes("borrow") || link.description.toLowerCase().includes("earn")) {
+    actionText = "Access Pool";
+  } else if (link.description.toLowerCase().includes("provide liquidity")) {
+    actionText = "Add Liquidity";
+  }
+  
   return (
     <Card className="bg-card rounded-lg overflow-hidden h-full border-gray-800 transition-all hover:border-gray-700 hover:shadow-md">
       <a 
@@ -28,7 +37,7 @@ const OpportunityCard = ({ link }: OpportunityCardProps) => {
           <p className="text-sm text-gray-400 mb-4 flex-grow">{link.description}</p>
           
           <div className="flex items-center text-primary text-sm font-medium">
-            <span>Learn more</span>
+            <span>{actionText}</span>
             <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
           </div>
         </div>

@@ -10,6 +10,11 @@ const UseVUSD = () => {
     <div className="max-w-6xl mx-auto">
       <h1 className="text-3xl font-heading font-bold mb-6">Use Your VUSD</h1>
       
+      {/* VUSD Opportunities - Now at the top */}
+      <div className="mb-8">
+        <OpportunitiesRow />
+      </div>
+      
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <Card>
           <CardHeader>
@@ -71,11 +76,6 @@ const UseVUSD = () => {
             </p>
           </CardContent>
         </Card>
-      </div>
-      
-      {/* VUSD Opportunities */}
-      <div className="mb-8">
-        <OpportunitiesRow />
       </div>
       
       <Card className="mt-6">
