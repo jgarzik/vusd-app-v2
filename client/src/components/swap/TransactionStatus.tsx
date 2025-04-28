@@ -74,9 +74,9 @@ const TransactionStatus = ({
         return "Your transaction is being processed on the blockchain";
       case "success":
         if (isMinting) {
-          return `You've successfully minted ${formatAmount(toAmount)} ${toToken.symbol} with ${formatAmount(fromAmount)} ${fromToken.symbol}`;
+          return `You've successfully minted ${formatAmount(toAmount, toToken.decimals, true)} ${toToken.symbol} with ${formatAmount(fromAmount, fromToken.decimals, true)} ${fromToken.symbol}`;
         } else {
-          return `You've successfully redeemed ${formatAmount(fromAmount)} ${fromToken.symbol} for ${formatAmount(toAmount)} ${toToken.symbol}`;
+          return `You've successfully redeemed ${formatAmount(fromAmount, fromToken.decimals, true)} ${fromToken.symbol} for ${formatAmount(toAmount, toToken.decimals, true)} ${toToken.symbol}`;
         }
       case "error":
         return `There was an error ${isMinting ? 'minting VUSD' : 'redeeming VUSD'}`;
@@ -111,25 +111,37 @@ const TransactionStatus = ({
           <p className="text-gray-400 mb-6">{getStatusDescription()}</p>
           
           {status !== "pending" && (
-            <div className="flex justify-between items-center p-3 bg-background-light rounded-xl mb-4">
-              <div className="flex items-center">
-                <div className={`w-8 h-8 rounded-full overflow-hidden ${getTokenIconClass(fromToken.symbol)} mr-3 flex items-center justify-center`}>
-                  <span className="font-bold text-white">
-                    {fromToken.symbol === "VUSD" ? "V" : "$"}
-                  </span>
+            <div className="p-3 bg-background-light rounded-xl mb-4">
+              <div className="flex flex-col sm:flex-row justify-between items-center">
+                {/* From Token */}
+                <div className="flex items-center mb-2 sm:mb-0">
+                  <div className={`w-8 h-8 rounded-full overflow-hidden ${getTokenIconClass(fromToken.symbol)} mr-3 flex items-center justify-center`}>
+                    <span className="font-bold text-white">
+                      {fromToken.symbol === "VUSD" ? "V" : "$"}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="font-medium">{formatAmount(fromAmount, fromToken.decimals, true)} {fromToken.symbol}</div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-medium">{formatAmount(fromAmount, fromToken.decimals, true)} {fromToken.symbol}</div>
+                
+                {/* Arrow */}
+                <div className="flex justify-center mx-2 mb-2 sm:mb-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
                 </div>
-              </div>
-              <div className="flex items-center">
-                <div>
-                  <div className="font-medium">{formatAmount(toAmount, toToken.decimals, true)} {toToken.symbol}</div>
-                </div>
-                <div className={`w-8 h-8 rounded-full overflow-hidden ${getTokenIconClass(toToken.symbol)} ml-3 flex items-center justify-center`}>
-                  <span className="font-bold text-white">
-                    {toToken.symbol === "VUSD" ? "V" : "$"}
-                  </span>
+                
+                {/* To Token */}
+                <div className="flex items-center">
+                  <div>
+                    <div className="font-medium">{formatAmount(toAmount, toToken.decimals, true)} {toToken.symbol}</div>
+                  </div>
+                  <div className={`w-8 h-8 rounded-full overflow-hidden ${getTokenIconClass(toToken.symbol)} ml-3 flex items-center justify-center`}>
+                    <span className="font-bold text-white">
+                      {toToken.symbol === "VUSD" ? "V" : "$"}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
