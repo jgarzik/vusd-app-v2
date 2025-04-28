@@ -420,7 +420,7 @@ const SwapInterface = () => {
             onClick={buttonInfo.action}
             disabled={buttonInfo.disabled}
           >
-            {loading || checkingApproval 
+            {(checkingApproval && buttonInfo.text !== "Enter an amount") 
               ? "Loading..." 
               : buttonInfo.text}
           </Button>

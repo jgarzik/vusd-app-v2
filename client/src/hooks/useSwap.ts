@@ -25,7 +25,6 @@ import { useWeb3 } from './useWeb3';
 import { useEthersContracts } from './useEthersContracts';
 import { useToast } from './use-toast';
 import { SUPPORTED_TOKENS } from '@/constants/tokens';
-// ethers v6 has built-in parseUnits, no need to import separately
 
 type TokenBalances = Record<string, number>;
 type SwapDirection = 'toVUSD' | 'fromVUSD';
@@ -173,9 +172,6 @@ export const useSwap = () => {
    * @throws Displays a toast notification to the user on errors
    */
   const estimateSwap = useCallback(async (amount: number, fromToken: string, toToken: string) => {
-    // Always reset loading state when entering the function
-    setLoading(false);
-    
     if (!amount || amount <= 0) {
       setOutputAmount(0);
       return;
@@ -183,17 +179,13 @@ export const useSwap = () => {
     
     if (!contracts) {
       setOutputAmount(0);
-      console.warn('Contracts not available for estimation');
       return;
     }
     
     try {
-      setLoading(true);
-      
       const direction: SwapDirection = toToken === 'VUSD' ? 'toVUSD' : 'fromVUSD';
       
       if (direction === 'toVUSD' && contracts.minter) {
-        // Minting VUSD
         const fromTokenAddress = getTokenAddress(fromToken);
         const fromTokenDecimals = getTokenDecimals(fromToken);
         const amountIn = ethers.parseUnits(amount.toString(), fromTokenDecimals);
@@ -201,27 +193,21 @@ export const useSwap = () => {
         const mintage = await contracts.minter.calculateMintage(fromTokenAddress, amountIn);
         setOutputAmount(parseFloat(ethers.formatUnits(mintage, 18)));
         
-        // Get minting fee
         const mintingFee = await contracts.minter.mintingFee();
         setFee(parseFloat(ethers.formatUnits(mintingFee, 4)) / 100);
       } else if (direction === 'fromVUSD' && contracts.redeemer) {
-        // Redeeming VUSD
         const toTokenAddress = getTokenAddress(toToken);
         const amountIn = ethers.parseUnits(amount.toString(), 18); // VUSD has 18 decimals
         
-        // Use getFunction to disambiguate between overloaded functions
         const redeemableFunc = contracts.redeemer.getFunction("redeemable(address,uint256)");
         const redeemable = await redeemableFunc(toTokenAddress, amountIn);
         const toTokenDecimals = getTokenDecimals(toToken);
         setOutputAmount(parseFloat(ethers.formatUnits(redeemable, toTokenDecimals)));
         
-        // Get redeem fee
         const redeemFee = await contracts.redeemer.redeemFee();
         setFee(parseFloat(ethers.formatUnits(redeemFee, 4)) / 100);
       } else {
-        // Either contract is not available
         setOutputAmount(0);
-        console.warn('Required contract is not available', { direction, hasMinter: !!contracts.minter, hasRedeemer: !!contracts.redeemer });
       }
     } catch (error) {
       console.error('Error estimating swap:', error);
@@ -231,8 +217,6 @@ export const useSwap = () => {
         description: 'Failed to estimate swap amount',
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
     }
   }, [contracts, getTokenAddress, getTokenDecimals, toast]);
   
@@ -388,9 +372,6 @@ export const useSwap = () => {
    * - For 'fromVUSD': Checks if the VUSD allowance to Redeemer is sufficient
    */
   const checkApprovalNeeded = useCallback(async (): Promise<boolean> => {
-    // Reset checking state at the start to prevent getting stuck
-    setCheckingApproval(false);
-    
     if (!isConnected || !address || !inputAmount || inputAmount <= 0) {
       return false;
     }
