@@ -288,84 +288,31 @@ const Analytics = () => {
       <Card>
         <CardHeader>
           <CardTitle>VUSD Activity</CardTitle>
-          <CardDescription>Minting and redemption volume over time</CardDescription>
+          <CardDescription>Historical swapping volume data</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="weekly" className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="weekly">Weekly</TabsTrigger>
-              <TabsTrigger value="monthly">Monthly</TabsTrigger>
-              <TabsTrigger value="yearly">Yearly</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="weekly" className="mt-0">
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart
-                  data={[
-                    { name: 'Mon', mint: 120000, redeem: 80000 },
-                    { name: 'Tue', mint: 145000, redeem: 100000 },
-                    { name: 'Wed', mint: 260000, redeem: 120000 },
-                    { name: 'Thu', mint: 320000, redeem: 190000 },
-                    { name: 'Fri', mint: 280000, redeem: 220000 },
-                    { name: 'Sat', mint: 150000, redeem: 100000 },
-                    { name: 'Sun', mint: 90000, redeem: 50000 },
-                  ]}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <XAxis dataKey="name" />
-                  <YAxis tickFormatter={(value) => `$${value / 1000}k`} />
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                  <Legend />
-                  <Bar dataKey="mint" name="Minted" fill="#3B82F6" />
-                  <Bar dataKey="redeem" name="Redeemed" fill="#6366F1" />
-                </BarChart>
-              </ResponsiveContainer>
-            </TabsContent>
-            
-            <TabsContent value="monthly" className="mt-0">
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart
-                  data={[
-                    { name: 'Week 1', mint: 800000, redeem: 500000 },
-                    { name: 'Week 2', mint: 1200000, redeem: 780000 },
-                    { name: 'Week 3', mint: 980000, redeem: 850000 },
-                    { name: 'Week 4', mint: 1500000, redeem: 1100000 },
-                  ]}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <XAxis dataKey="name" />
-                  <YAxis tickFormatter={(value) => `$${value / 1000000}M`} />
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                  <Legend />
-                  <Bar dataKey="mint" name="Minted" fill="#3B82F6" />
-                  <Bar dataKey="redeem" name="Redeemed" fill="#6366F1" />
-                </BarChart>
-              </ResponsiveContainer>
-            </TabsContent>
-            
-            <TabsContent value="yearly" className="mt-0">
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart
-                  data={[
-                    { name: 'Jan', mint: 3500000, redeem: 2800000 },
-                    { name: 'Feb', mint: 4200000, redeem: 3100000 },
-                    { name: 'Mar', mint: 5100000, redeem: 3800000 },
-                    { name: 'Apr', mint: 4800000, redeem: 4200000 },
-                    { name: 'May', mint: 6500000, redeem: 5100000 },
-                    { name: 'Jun', mint: 7800000, redeem: 6300000 },
-                  ]}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <XAxis dataKey="name" />
-                  <YAxis tickFormatter={(value) => `$${value / 1000000}M`} />
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                  <Legend />
-                  <Bar dataKey="mint" name="Minted" fill="#3B82F6" />
-                  <Bar dataKey="redeem" name="Redeemed" fill="#6366F1" />
-                </BarChart>
-              </ResponsiveContainer>
-            </TabsContent>
-          </Tabs>
+          <div className="flex flex-col items-center justify-center py-10 space-y-6 text-center">
+            <div className="rounded-full bg-gray-800/50 p-6 w-20 h-20 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin"></div>
+            </div>
+            <div className="max-w-md">
+              <h3 className="text-lg font-medium mb-2">Activity data will be available soon</h3>
+              <p className="text-gray-400 text-sm">
+                Real-time transaction activity data for the VUSD protocol is being indexed from the blockchain. 
+                This section will display actual swapping volume once the indexing service is connected.
+              </p>
+            </div>
+            <div className="flex gap-4 mt-4">
+              <div className="p-4 border border-gray-800 rounded-lg flex items-center gap-3 bg-background-card">
+                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                <div className="text-sm">Swap to VUSD</div>
+              </div>
+              <div className="p-4 border border-gray-800 rounded-lg flex items-center gap-3 bg-background-card">
+                <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                <div className="text-sm">Swap from VUSD</div>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
