@@ -475,8 +475,20 @@ export const useSwap = () => {
   useEffect(() => {
     const checkApproval = async () => {
       if (isConnected && inputAmount > 0) {
-        const needsApproval = await checkApprovalNeeded();
-        setNeedsApproval(needsApproval);
+        try {
+          setCheckingApproval(true);
+          const needsApproval = await checkApprovalNeeded();
+          setNeedsApproval(needsApproval);
+        } catch (error) {
+          console.error('Error checking approval:', error);
+          setNeedsApproval(false);
+        } finally {
+          setCheckingApproval(false);
+        }
+      } else {
+        // Reset approval state when not connected or no input
+        setNeedsApproval(false);
+        setCheckingApproval(false);
       }
     };
     
