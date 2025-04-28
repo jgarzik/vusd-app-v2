@@ -48,7 +48,13 @@ import { SUPPORTED_TOKENS, Token } from "@/constants/tokens";
  */
 const SwapInterface = () => {
   const { toast } = useToast();
-  const { address, isConnected } = useWeb3();
+  const { 
+    address, 
+    isConnected, 
+    connect, 
+    connectors,
+    isMainnet
+  } = useWeb3();
   const {
     balances,
     inputToken,
@@ -62,7 +68,10 @@ const SwapInterface = () => {
     setInputAmount,
     setOutputAmount,
     executeSwap,
+    approveTokens,
     loading,
+    checkingApproval,
+    needsApproval,
     estimateSwap
   } = useSwap();
 
@@ -78,10 +87,12 @@ const SwapInterface = () => {
    * either token selection changes, keeping the output value in sync.
    */
   useEffect(() => {
-    if (inputAmount && inputToken && outputToken) {
+    if (inputAmount && inputAmount > 0 && inputToken && outputToken) {
       estimateSwap(inputAmount, inputToken, outputToken);
+    } else {
+      setOutputAmount(0);
     }
-  }, [inputAmount, inputToken, outputToken, estimateSwap]);
+  }, [inputAmount, inputToken, outputToken, estimateSwap, setOutputAmount]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -95,68 +106,124 @@ const SwapInterface = () => {
   };
 
   /**
-   * Executes the token swap transaction after validating requirements.
+   * Determines the appropriate button action and text based on current state.
    * 
-   * @async
-   * @returns {Promise<void>} 
+   * @returns {Object} Button action and text information
+   * @property {Function} action - The function to call when the button is clicked
+   * @property {string} text - The text to display on the button
+   * @property {boolean} disabled - Whether the button should be disabled
    * 
    * @remarks
-   * This function handles the entire swap execution process:
-   * 1. Validates wallet connection, input amount, and token balance
-   * 2. Updates transaction UI state to show pending status
-   * 3. Executes the appropriate contract call (mint/redeem) via useSwap
-   * 4. Updates UI with success or error state based on transaction result
-   * 
-   * @throws Displays toast notification with error details if the transaction fails
+   * This follows a cascading flow of actions:
+   * 1. Connect wallet if not connected
+   * 2. Switch to Ethereum if on a different network
+   * 3. Approve token spending if needed
+   * 4. Execute the swap if all requirements are met
    */
-  const handleSwap = async () => {
-    // Validate wallet connection
+  const getButtonInfo = () => {
+    // Step 1: Check if wallet is connected
     if (!isConnected) {
-      toast({
-        title: "Wallet not connected",
-        description: "Please connect your wallet to swap tokens",
-        variant: "destructive"
-      });
-      return;
+      return {
+        action: () => {
+          // Use first available connector (typically MetaMask or WalletConnect)
+          if (connectors && connectors.length > 0) {
+            connect(connectors[0].id);
+          }
+        },
+        text: "Connect Wallet",
+        disabled: false
+      };
     }
-
+    
+    // Step 2: Check if on Ethereum mainnet (chain ID 1)
+    if (!isMainnet) {
+      return {
+        action: () => {
+          toast({
+            title: "Wrong Network",
+            description: "Please switch to Ethereum Mainnet in your wallet",
+            variant: "destructive"
+          });
+        },
+        text: "Switch to Ethereum",
+        disabled: false
+      };
+    }
+    
     // Validate input amount
     if (!inputAmount || inputAmount <= 0) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a valid amount to swap",
-        variant: "destructive"
-      });
-      return;
+      return {
+        action: () => {},
+        text: "Enter an amount",
+        disabled: true
+      };
     }
-
+    
     // Check token balance
     const balance = balances[inputToken];
     if (balance < inputAmount) {
-      toast({
-        title: "Insufficient balance",
-        description: `You don't have enough ${inputToken} to make this swap`,
-        variant: "destructive"
-      });
-      return;
+      return {
+        action: () => {},
+        text: `Insufficient ${inputToken} balance`,
+        disabled: true
+      };
     }
-
-    // Execute swap transaction
-    setTxStatus("pending");
-    try {
-      const tx = await executeSwap();
-      setTxHash(tx.hash);
-      setTxStatus("success");
-    } catch (error) {
-      console.error("Swap error:", error);
-      setTxStatus("error");
-      toast({
-        title: "Transaction failed",
-        description: (error as Error).message || "An error occurred during the swap",
-        variant: "destructive"
-      });
+    
+    // Step 3: Check if token approval is needed
+    if (needsApproval) {
+      return {
+        action: async () => {
+          try {
+            setTxStatus("pending");
+            const tx = await approveTokens();
+            setTxHash(tx.hash);
+            toast({
+              title: "Approval Successful",
+              description: "You can now proceed with the swap",
+            });
+          } catch (error) {
+            console.error("Approval error:", error);
+            toast({
+              title: "Approval Failed",
+              description: (error as Error).message || "Failed to approve token spending",
+              variant: "destructive"
+            });
+          } finally {
+            setTxStatus("none");
+          }
+        },
+        text: `Approve ${inputToken}`,
+        disabled: loading || checkingApproval
+      };
     }
+    
+    // Step 4: Execute the swap
+    return {
+      action: async () => {
+        setTxStatus("pending");
+        try {
+          const tx = await executeSwap();
+          setTxHash(tx.hash);
+          setTxStatus("success");
+        } catch (error) {
+          console.error("Swap error:", error);
+          setTxStatus("error");
+          toast({
+            title: "Transaction Failed",
+            description: (error as Error).message || "An error occurred during the swap",
+            variant: "destructive"
+          });
+        }
+      },
+      text: outputToken === 'VUSD' 
+        ? `Swap ${inputToken} for VUSD` 
+        : `Swap VUSD for ${outputToken}`,
+      disabled: loading || checkingApproval
+    };
   };
+  
+  // Get current button state
+  const buttonInfo = getButtonInfo();
 
   const switchTokens = () => {
     setInputToken(outputToken);
@@ -347,19 +414,15 @@ const SwapInterface = () => {
             </div>
           </div>
           
-          {/* Swap Button */}
+          {/* Smart Cascading Swap Button */}
           <Button
             className="w-full font-medium rounded-xl py-6 text-base"
-            onClick={handleSwap}
-            disabled={!isConnected || loading || !inputAmount || inputAmount <= 0}
+            onClick={buttonInfo.action}
+            disabled={buttonInfo.disabled}
           >
-            {!isConnected 
-              ? "Connect Wallet" 
-              : loading 
-                ? "Loading..." 
-                : outputToken === 'VUSD'
-                  ? `Swap ${inputToken} for VUSD`
-                  : `Swap VUSD for ${outputToken}`}
+            {loading || checkingApproval 
+              ? "Loading..." 
+              : buttonInfo.text}
           </Button>
         </div>
       </div>

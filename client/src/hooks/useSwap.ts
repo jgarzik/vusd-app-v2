@@ -361,6 +361,128 @@ export const useSwap = () => {
     setOutputAmount(inputAmount);
   }, [inputToken, outputToken, inputAmount, outputAmount]);
   
+  /**
+   * Checks if the current swap requires token approval.
+   * 
+   * @async
+   * @returns {Promise<boolean>} Whether approval is needed
+   * 
+   * @remarks
+   * This function determines whether the user needs to approve token spending
+   * before executing a swap. It checks the current allowance against the required
+   * amount based on the swap direction:
+   * - For 'toVUSD': Checks if the input token allowance to Minter is sufficient
+   * - For 'fromVUSD': Checks if the VUSD allowance to Redeemer is sufficient
+   */
+  const checkApprovalNeeded = useCallback(async (): Promise<boolean> => {
+    if (!isConnected || !address || !inputAmount || inputAmount <= 0) {
+      return false;
+    }
+    
+    try {
+      setCheckingApproval(true);
+      const connectedContracts = await getConnectedContracts();
+      const direction = getSwapDirection();
+      
+      if (direction === 'toVUSD') {
+        // Check approval for input token -> Minter
+        const inputTokenAddress = getTokenAddress(inputToken);
+        const inputTokenContract = connectedContracts.getERC20Contract(inputTokenAddress);
+        const inputDecimals = getTokenDecimals(inputToken);
+        const amount = ethers.parseUnits(inputAmount.toString(), inputDecimals);
+        
+        const allowance = await inputTokenContract.allowance(address, connectedContracts.minter.target);
+        return allowance < amount;
+      } else {
+        // Check approval for VUSD -> Redeemer
+        const amount = ethers.parseUnits(inputAmount.toString(), 18); // VUSD has 18 decimals
+        const allowance = await connectedContracts.vusd.allowance(address, connectedContracts.redeemer.target);
+        return allowance < amount;
+      }
+    } catch (error) {
+      console.error('Error checking approval:', error);
+      return false;
+    } finally {
+      setCheckingApproval(false);
+    }
+  }, [
+    address,
+    isConnected,
+    inputAmount,
+    inputToken,
+    getSwapDirection,
+    getTokenAddress,
+    getTokenDecimals,
+    getConnectedContracts
+  ]);
+  
+  /**
+   * Approves token spending for the current swap.
+   * 
+   * @async
+   * @returns {Promise<ethers.TransactionResponse>} The approval transaction
+   * 
+   * @remarks
+   * This function handles token approval for the current swap:
+   * - For 'toVUSD': Approves the Minter contract to spend the input token
+   * - For 'fromVUSD': Approves the Redeemer contract to spend VUSD
+   * 
+   * It uses MaxUint256 as the approval amount to avoid needing multiple approvals.
+   */
+  const approveTokens = useCallback(async () => {
+    if (!isConnected || !address) {
+      throw new Error('Wallet not connected');
+    }
+    
+    try {
+      setLoading(true);
+      const connectedContracts = await getConnectedContracts();
+      const direction = getSwapDirection();
+      
+      if (direction === 'toVUSD') {
+        // Approve input token -> Minter
+        const inputTokenAddress = getTokenAddress(inputToken);
+        const inputTokenContract = connectedContracts.getERC20Contract(inputTokenAddress);
+        
+        const tx = await inputTokenContract.approve(connectedContracts.minter.target, ethers.MaxUint256);
+        await tx.wait();
+        return tx;
+      } else {
+        // Approve VUSD -> Redeemer
+        const tx = await connectedContracts.vusd.approve(connectedContracts.redeemer.target, ethers.MaxUint256);
+        await tx.wait();
+        return tx;
+      }
+    } catch (error) {
+      console.error('Error approving tokens:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+      // After approval, refresh the approval status
+      await checkApprovalNeeded();
+    }
+  }, [
+    address,
+    isConnected,
+    inputToken,
+    getSwapDirection,
+    getTokenAddress,
+    getConnectedContracts,
+    checkApprovalNeeded
+  ]);
+
+  // Automatically check approval status when input changes
+  useEffect(() => {
+    const checkApproval = async () => {
+      if (isConnected && inputAmount > 0) {
+        const needsApproval = await checkApprovalNeeded();
+        setNeedsApproval(needsApproval);
+      }
+    };
+    
+    checkApproval();
+  }, [isConnected, inputAmount, inputToken, outputToken, checkApprovalNeeded]);
+  
   return {
     balances,
     inputToken,
@@ -369,6 +491,8 @@ export const useSwap = () => {
     outputAmount,
     fee,
     loading,
+    checkingApproval,
+    needsApproval,
     setInputToken,
     setOutputToken,
     setInputAmount,
@@ -376,6 +500,8 @@ export const useSwap = () => {
     swapTokens,
     executeSwap,
     estimateSwap,
+    approveTokens,
+    checkApprovalNeeded,
     refreshBalances: fetchBalances,
   };
 };
