@@ -67,179 +67,178 @@ const Analytics = () => {
         </Card>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Treasury Composition</CardTitle>
-            <CardDescription>Distribution of assets in the VUSD treasury</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-sm font-medium text-gray-300">T1 (Whitelisted Stablecoins)</div>
-                <div className="text-sm font-medium">{formatCurrency(treasuryData.t1Value)}</div>
-              </div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-sm font-medium text-gray-300">T2 (Other Assets)</div>
-                <div className="text-sm font-medium">{formatCurrency(treasuryData.t2Value)}</div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="text-sm font-medium text-gray-300">Excess Value</div>
-                <div className="text-sm font-medium text-green-500">+{formatCurrency(treasuryData.excessValue)}</div>
-              </div>
+      {/* Full-width Treasury Composition Card with horizontal layout */}
+      <Card className="w-full mb-6">
+        <CardHeader>
+          <CardTitle>Treasury Composition</CardTitle>
+          <CardDescription>Distribution of assets in the VUSD treasury</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-sm font-medium text-gray-300">T1 (Whitelisted Stablecoins)</div>
+              <div className="text-sm font-medium">{formatCurrency(treasuryData.t1Value)}</div>
             </div>
-            
-            {loading ? (
-              <div className="h-[350px] flex items-center justify-center">Loading...</div>
-            ) : (
-              <div className="flex flex-col mb-2">
-                {/* Main Treasury Composition Pie Chart (T1 assets individually + T2 as a single slice) */}
-                <div className="relative">
-                  <div className="text-base font-semibold mb-2 text-center bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Complete Treasury Composition</div>
-                  <ResponsiveContainer width="100%" height={180}>
-                    <PieChart>
-                      <Pie
-                        data={[
-                          ...treasuryData.t1Assets.map(asset => ({
-                            name: asset.symbol,
-                            value: asset.value,
-                            symbol: asset.symbol,
-                            isT1: true
-                          })),
-                          { 
-                            name: 'T2 Assets', 
-                            value: treasuryData.t2Value, 
-                            symbol: 'T2 Assets',
-                            isT2: true 
-                          }
-                        ]}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={true}
-                        outerRadius={70}
-                        innerRadius={30}
-                        fill="#8884d8"
-                        dataKey="value"
-                        nameKey="name"
-                        label={(entry) => entry.symbol}
-                        paddingAngle={2}
-                      >
-                        {/* T1 Assets get blue colors with different shades */}
-                        {treasuryData.t1Assets.map((_, index) => (
-                          <Cell 
-                            key={`t1-cell-${index}`} 
-                            fill={`hsl(210, 100%, ${55 + (index * 10)}%)`} 
-                            stroke="#131720"
-                            strokeWidth={1}
-                          />
-                        ))}
-                        {/* T2 Assets get a distinct green color */}
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-sm font-medium text-gray-300">T2 (Other Assets)</div>
+              <div className="text-sm font-medium">{formatCurrency(treasuryData.t2Value)}</div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-medium text-gray-300">Excess Value</div>
+              <div className="text-sm font-medium text-green-500">+{formatCurrency(treasuryData.excessValue)}</div>
+            </div>
+          </div>
+          
+          {loading ? (
+            <div className="h-[350px] flex items-center justify-center">Loading...</div>
+          ) : (
+            <div className="flex flex-col md:flex-row gap-6 mb-2">
+              {/* Left side: Main Treasury Composition Pie Chart (T1 assets individually + T2 as a single slice) */}
+              <div className="flex-1 relative">
+                <div className="text-base font-semibold mb-2 text-center bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Complete Treasury Composition</div>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={[
+                        ...treasuryData.t1Assets.map(asset => ({
+                          name: asset.symbol,
+                          value: asset.value,
+                          symbol: asset.symbol,
+                          isT1: true
+                        })),
+                        { 
+                          name: 'T2 Assets', 
+                          value: treasuryData.t2Value, 
+                          symbol: 'T2 Assets',
+                          isT2: true 
+                        }
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={true}
+                      outerRadius={110}
+                      innerRadius={60}
+                      fill="#8884d8"
+                      dataKey="value"
+                      nameKey="name"
+                      label={(entry) => entry.symbol}
+                      paddingAngle={2}
+                    >
+                      {/* T1 Assets get blue colors with different shades */}
+                      {treasuryData.t1Assets.map((_, index) => (
                         <Cell 
-                          key="t2-cell" 
-                          fill={T2_COLOR} 
+                          key={`t1-cell-${index}`} 
+                          fill={`hsl(210, 100%, ${55 + (index * 10)}%)`} 
                           stroke="#131720"
                           strokeWidth={1}
                         />
-                      </Pie>
-                      <Tooltip 
-                        formatter={(value) => formatCurrency(value as number)}
-                        contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none' }}
-                        itemStyle={{ color: '#fff' }}
+                      ))}
+                      {/* T2 Assets get a distinct green color */}
+                      <Cell 
+                        key="t2-cell" 
+                        fill={T2_COLOR} 
+                        stroke="#131720"
+                        strokeWidth={1}
                       />
-                      <Legend 
-                        layout="horizontal"
-                        verticalAlign="bottom"
-                        align="center"
-                        wrapperStyle={{ paddingTop: 10 }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value) => formatCurrency(value as number)}
+                      contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none' }}
+                      itemStyle={{ color: '#fff' }}
+                    />
+                    <Legend 
+                      layout="horizontal"
+                      verticalAlign="bottom"
+                      align="center"
+                      wrapperStyle={{ paddingTop: 10 }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Center: Visual Connection between charts (horizontal now) */}
+              <div className="hidden md:flex flex-col justify-center items-center w-20 mx-2 relative">
+                {/* Horizontal connecting line with animated gradient */}
+                <div className="h-0.5 w-full bg-gradient-to-r from-blue-600 via-teal-500 to-green-600 relative overflow-hidden after:absolute after:inset-0 after:bg-gradient-to-r after:from-transparent after:via-white/20 after:to-transparent after:animate-shimmer"></div>
+                
+                {/* Circle in the middle of the line */}
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-background-card rounded-full flex items-center justify-center border border-green-500/50 shadow-[0_0_10px_rgba(5,150,105,0.3)]">
+                  <div className="w-5 h-5 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full"></div>
                 </div>
                 
-                {/* Visual Connection between charts */}
-                <div className="flex justify-center items-center h-16 relative my-2">
-                  {/* Decorative dots on the left */}
-                  <div className="absolute left-1/4 top-0 flex flex-col gap-1.5">
-                    <div className="w-1 h-1 bg-green-500 rounded-full opacity-60"></div>
-                    <div className="w-1 h-1 bg-green-500 rounded-full opacity-80"></div>
-                    <div className="w-1 h-1 bg-green-500 rounded-full"></div>
-                  </div>
-                  
-                  {/* Decorative dots on the right */}
-                  <div className="absolute right-1/4 bottom-0 flex flex-col gap-1.5">
-                    <div className="w-1 h-1 bg-green-500 rounded-full"></div>
-                    <div className="w-1 h-1 bg-green-500 rounded-full opacity-80"></div>
-                    <div className="w-1 h-1 bg-green-500 rounded-full opacity-60"></div>
-                  </div>
-                
-                  {/* Vertical connecting line with animated gradient */}
-                  <div className="h-full w-0.5 bg-gradient-to-b from-cyan-600 via-green-500 to-emerald-600 relative overflow-hidden after:absolute after:inset-0 after:bg-gradient-to-t after:from-transparent after:via-white/20 after:to-transparent after:animate-shimmer"></div>
-                  
-                  {/* Circle in the middle of the line */}
-                  <div className="absolute top-1/2 -translate-y-1/2 w-7 h-7 bg-background-card rounded-full flex items-center justify-center border border-green-500/50 shadow-[0_0_10px_rgba(5,150,105,0.3)]">
-                    <div className="w-3.5 h-3.5 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full"></div>
-                  </div>
-                  
-                  {/* Arrow at the bottom */}
-                  <div className="absolute bottom-0 -translate-y-1/2">
-                    <ArrowRight className="h-5 w-5 text-emerald-500 transform -rotate-90 drop-shadow-[0_0_3px_rgba(5,150,105,0.5)]" />
-                  </div>
-                  
-                  {/* High-impact text label */}
-                  <div className="absolute -left-32 top-1/2 -translate-y-1/2 flex items-center">
-                    <div className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600 px-3 py-1.5 rounded-lg border border-green-500/20 shadow-[0_0_15px_rgba(5,150,105,0.2)] bg-background-card/80 backdrop-blur-sm">
-                      T2 ASSETS BREAKDOWN
-                    </div>
-                    <div className="w-6 h-px bg-gradient-to-r from-green-500 to-transparent"></div>
-                  </div>
+                {/* Arrow at the right side */}
+                <div className="absolute right-0 top-1/2 -translate-y-1/2">
+                  <ArrowRight className="h-6 w-6 text-emerald-500 drop-shadow-[0_0_3px_rgba(5,150,105,0.5)]" />
                 </div>
                 
-                {/* T2 Assets Detail Pie Chart */}
-                <div>
-                  <div className="text-base font-semibold mb-2 text-center bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">T2 Assets Breakdown</div>
-                  <ResponsiveContainer width="100%" height={180}>
-                    <PieChart>
-                      <Pie
-                        data={treasuryData.t2Assets}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={true}
-                        outerRadius={70}
-                        innerRadius={30}
-                        fill="#8884d8"
-                        dataKey="value"
-                        nameKey="symbol"
-                        label={(entry) => entry.symbol}
-                        paddingAngle={3}
-                      >
-                        {treasuryData.t2Assets.map((entry, index) => (
-                          <Cell 
-                            key={`t2-cell-${index}`} 
-                            fill={`hsl(${140 + (index * 30)}, 80%, 45%)`}
-                            stroke="#131720"
-                            strokeWidth={1}
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        formatter={(value) => formatCurrency(value as number)}
-                        contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none' }}
-                        itemStyle={{ color: '#fff' }}
-                      />
-                      <Legend 
-                        layout="horizontal"
-                        verticalAlign="bottom"
-                        align="center"
-                        wrapperStyle={{ paddingTop: 10 }}
-                        formatter={(value) => <span className="text-sm font-medium">{value}</span>}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
+                {/* High-impact text label above the line */}
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                  <div className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600 px-3 py-1.5 rounded-lg border border-green-500/20 shadow-[0_0_15px_rgba(5,150,105,0.2)] bg-background-card/80 backdrop-blur-sm">
+                    T2 BREAKDOWN
+                  </div>
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+              
+              {/* Mobile only connector (vertical) */}
+              <div className="flex md:hidden justify-center items-center h-16 relative my-2">
+                <div className="h-full w-0.5 bg-gradient-to-b from-blue-600 via-teal-500 to-green-600 relative overflow-hidden after:absolute after:inset-0 after:bg-gradient-to-t after:from-transparent after:via-white/20 after:to-transparent after:animate-shimmer"></div>
+                <div className="absolute top-1/2 -translate-y-1/2 w-7 h-7 bg-background-card rounded-full flex items-center justify-center border border-green-500/50 shadow-[0_0_10px_rgba(5,150,105,0.3)]">
+                  <div className="w-3.5 h-3.5 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full"></div>
+                </div>
+                <div className="absolute bottom-0 -translate-y-1/2">
+                  <ArrowRight className="h-5 w-5 text-emerald-500 transform -rotate-90 drop-shadow-[0_0_3px_rgba(5,150,105,0.5)]" />
+                </div>
+              </div>
+              
+              {/* Right side: T2 Assets Detail Pie Chart */}
+              <div className="flex-1">
+                <div className="text-base font-semibold mb-2 text-center bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">T2 Assets Breakdown</div>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={treasuryData.t2Assets}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={true}
+                      outerRadius={110}
+                      innerRadius={60}
+                      fill="#8884d8"
+                      dataKey="value"
+                      nameKey="symbol"
+                      label={(entry) => entry.symbol}
+                      paddingAngle={3}
+                    >
+                      {treasuryData.t2Assets.map((entry, index) => (
+                        <Cell 
+                          key={`t2-cell-${index}`} 
+                          fill={`hsl(${140 + (index * 30)}, 80%, 45%)`}
+                          stroke="#131720"
+                          strokeWidth={1}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value) => formatCurrency(value as number)}
+                      contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none' }}
+                      itemStyle={{ color: '#fff' }}
+                    />
+                    <Legend 
+                      layout="horizontal"
+                      verticalAlign="bottom"
+                      align="center"
+                      wrapperStyle={{ paddingTop: 10 }}
+                      formatter={(value) => <span className="text-sm font-medium">{value}</span>}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Grid for other cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         
         <Card>
           <CardHeader>
