@@ -51,26 +51,35 @@ const TransactionStatus = ({
   };
 
   const getStatusTitle = () => {
+    const isMinting = toToken.symbol === 'VUSD';
+    const operation = isMinting ? 'Mint' : 'Redeem';
+    
     switch (status) {
       case "pending":
-        return "Transaction Pending";
+        return `${operation} Transaction Pending`;
       case "success":
-        return "Transaction Successful";
+        return `${operation} Transaction Successful`;
       case "error":
-        return "Transaction Failed";
+        return `${operation} Transaction Failed`;
       default:
         return "";
     }
   };
 
   const getStatusDescription = () => {
+    const isMinting = toToken.symbol === 'VUSD';
+    
     switch (status) {
       case "pending":
         return "Your transaction is being processed on the blockchain";
       case "success":
-        return `You've successfully swapped ${formatAmount(fromAmount)} ${fromToken.symbol} for ${formatAmount(toAmount)} ${toToken.symbol}`;
+        if (isMinting) {
+          return `You've successfully minted ${formatAmount(toAmount)} ${toToken.symbol} with ${formatAmount(fromAmount)} ${fromToken.symbol}`;
+        } else {
+          return `You've successfully redeemed ${formatAmount(fromAmount)} ${fromToken.symbol} for ${formatAmount(toAmount)} ${toToken.symbol}`;
+        }
       case "error":
-        return "There was an error processing your transaction";
+        return `There was an error ${isMinting ? 'minting VUSD' : 'redeeming VUSD'}`;
       default:
         return "";
     }
@@ -90,7 +99,9 @@ const TransactionStatus = ({
     <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
       <DialogContent className="bg-background-card rounded-2xl max-w-md w-full overflow-hidden border-gray-800">
         <DialogHeader>
-          <DialogTitle className="font-heading font-semibold text-lg">Transaction Status</DialogTitle>
+          <DialogTitle className="font-heading font-semibold text-lg">
+            {toToken.symbol === 'VUSD' ? 'Mint Status' : 'Redeem Status'}
+          </DialogTitle>
         </DialogHeader>
         
         <div className="p-6 text-center">

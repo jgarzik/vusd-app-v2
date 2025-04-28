@@ -149,7 +149,11 @@ const SwapInterface = () => {
       <div className="swap-container mb-8">
         <div className="px-6 py-4 border-b border-gray-800">
           <h2 className="font-heading font-semibold text-xl">Swap</h2>
-          <p className="text-gray-400 text-sm mt-1">Exchange stablecoins with VUSD</p>
+          <p className="text-gray-400 text-sm mt-1">
+            {outputToken === 'VUSD' 
+              ? 'Mint VUSD by depositing stablecoins (0.01% fee)' 
+              : 'Redeem VUSD for stablecoins (0.1% fee)'}
+          </p>
         </div>
         
         <div className="p-6">
@@ -249,7 +253,16 @@ const SwapInterface = () => {
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-400">Fee</span>
-              <span className="text-gray-300">{fee ? `${(fee * 100).toFixed(1)}%` : "0.3%"}</span>
+              <span className="text-gray-300">
+                {outputToken === 'VUSD' 
+                  ? '0.01%' // Minting fee
+                  : '0.1%'   // Redeeming fee
+                }
+              </span>
+            </div>
+            <div className="flex justify-between items-center mt-1">
+              <span className="text-gray-400">Slippage</span>
+              <span className="text-gray-300">0% (Zero slippage)</span>
             </div>
           </div>
           
@@ -263,7 +276,9 @@ const SwapInterface = () => {
               ? "Connect Wallet" 
               : loading 
                 ? "Loading..." 
-                : `Swap ${inputToken} to ${outputToken}`}
+                : outputToken === 'VUSD'
+                  ? `Mint VUSD with ${inputToken}`
+                  : `Redeem VUSD for ${outputToken}`}
           </Button>
         </div>
       </div>
