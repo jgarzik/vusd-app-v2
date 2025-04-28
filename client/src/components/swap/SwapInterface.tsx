@@ -143,6 +143,12 @@ const SwapInterface = () => {
 
   // Get token display data
   const getTokenData = (symbol: string) => SUPPORTED_TOKENS.find(t => t.symbol === symbol) || SUPPORTED_TOKENS[0];
+  
+  // Helper function to get token decimals
+  const getTokenDecimals = (symbol: string): number => {
+    const token = SUPPORTED_TOKENS.find((t) => t.symbol === symbol);
+    return token?.decimals || 18; // Default to 18 if not found
+  };
 
   return (
     <>
@@ -207,7 +213,7 @@ const SwapInterface = () => {
             <div className="flex justify-between items-center mb-2">
               <label className="text-sm text-gray-400">To</label>
               <div className="text-sm text-gray-400">
-                Balance: <span>{isConnected ? formatAmount(balances[outputToken] || 0) : "-"}</span>
+                Balance: <span>{isConnected ? formatAmount(balances[outputToken] || 0, getTokenDecimals(outputToken)) : "-"}</span>
               </div>
             </div>
             
@@ -247,7 +253,8 @@ const SwapInterface = () => {
                   inputAmount || 0,
                   outputAmount || 0,
                   inputToken,
-                  outputToken
+                  outputToken,
+                  Math.max(getTokenDecimals(inputToken), getTokenDecimals(outputToken))
                 )}
               </span>
             </div>
