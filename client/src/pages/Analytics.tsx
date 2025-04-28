@@ -15,11 +15,14 @@ import {
 } from 'recharts';
 import { useTreasury } from "@/hooks/useTreasury";
 import { formatCurrency } from "@/lib/utils";
+import { ArrowRight } from "lucide-react";
 
 const Analytics = () => {
   const { treasuryData, loading } = useTreasury();
   
   const COLORS = ['#3B82F6', '#F59E0B', '#10B981', '#6366F1'];
+  const T1_COLOR = '#3B82F6';
+  const T2_COLOR = '#10B981';
   
   return (
     <div className="max-w-6xl mx-auto">
@@ -83,39 +86,102 @@ const Analytics = () => {
             </div>
             
             {loading ? (
-              <div className="h-[250px] flex items-center justify-center">Loading...</div>
+              <div className="h-[350px] flex items-center justify-center">Loading...</div>
             ) : (
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={[...treasuryData.t1Assets, ...treasuryData.t2Assets]}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                    nameKey="symbol"
-                    // Remove the on-chart labels to prevent overlapping
-                    label={false}
-                  >
-                    {[...treasuryData.t1Assets, ...treasuryData.t2Assets].map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    formatter={(value) => formatCurrency(value as number)}
-                    contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none' }}
-                    itemStyle={{ color: '#fff' }}
-                  />
-                  <Legend 
-                    layout="horizontal"
-                    verticalAlign="bottom"
-                    align="center"
-                    wrapperStyle={{ paddingTop: 20 }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+              <div className="flex flex-col mb-2">
+                {/* Main Treasury Composition Pie Chart */}
+                <div className="relative">
+                  <div className="text-xs font-semibold mb-1 text-center">Complete Treasury Composition</div>
+                  <ResponsiveContainer width="100%" height={140}>
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: 'T1 Assets', value: treasuryData.t1Value, symbol: 'T1 Assets' },
+                          { name: 'T2 Assets', value: treasuryData.t2Value, symbol: 'T2 Assets' }
+                        ]}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={60}
+                        fill="#8884d8"
+                        dataKey="value"
+                        nameKey="name"
+                        label={false}
+                      >
+                        <Cell key="cell-0" fill={T1_COLOR} />
+                        <Cell key="cell-1" fill={T2_COLOR} />
+                      </Pie>
+                      <Tooltip 
+                        formatter={(value) => formatCurrency(value as number)}
+                        contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none' }}
+                        itemStyle={{ color: '#fff' }}
+                      />
+                      <Legend 
+                        layout="horizontal"
+                        verticalAlign="bottom"
+                        align="center"
+                        wrapperStyle={{ paddingTop: 10 }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                
+                {/* Visual Connection between charts */}
+                <div className="flex justify-center items-center h-10 relative my-1">
+                  {/* Vertical connecting line */}
+                  <div className="h-full w-0.5 bg-gradient-to-b from-gray-600 to-green-600"></div>
+                  
+                  {/* Circle in the middle of the line */}
+                  <div className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-background-card rounded-full flex items-center justify-center border border-gray-600">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  </div>
+                  
+                  {/* Arrow at the bottom */}
+                  <div className="absolute bottom-0 -translate-y-1/2">
+                    <ArrowRight className="h-4 w-4 text-green-500 transform -rotate-90" />
+                  </div>
+                  
+                  {/* Text label */}
+                  <div className="absolute -left-24 top-1/2 -translate-y-1/2 text-xs text-green-500 font-medium bg-background-card px-2 py-0.5 rounded border border-gray-700 shadow-sm">
+                    T2 Breakdown
+                  </div>
+                </div>
+                
+                {/* T2 Assets Detail Pie Chart */}
+                <div>
+                  <div className="text-xs font-semibold mb-1 text-center">T2 Assets Breakdown</div>
+                  <ResponsiveContainer width="100%" height={140}>
+                    <PieChart>
+                      <Pie
+                        data={treasuryData.t2Assets}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={60}
+                        fill="#8884d8"
+                        dataKey="value"
+                        nameKey="symbol"
+                        label={false}
+                      >
+                        {treasuryData.t2Assets.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        formatter={(value) => formatCurrency(value as number)}
+                        contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none' }}
+                        itemStyle={{ color: '#fff' }}
+                      />
+                      <Legend 
+                        layout="horizontal"
+                        verticalAlign="bottom"
+                        align="center"
+                        wrapperStyle={{ paddingTop: 10 }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
