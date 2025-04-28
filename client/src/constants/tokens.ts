@@ -2,6 +2,22 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * tokens.ts - Token definitions for the VUSD application
+ * 
+ * This module defines all supported tokens for the VUSD application, specifically:
+ * - VUSD: The core stablecoin of the platform
+ * - Whitelisted stablecoins: USDC, USDT, and DAI that can be swapped with VUSD
+ * 
+ * Each token includes critical metadata like:
+ * - Symbol: Short identifier (e.g., "VUSD", "USDC")
+ * - Name: Full name (e.g., "VUSD Stablecoin")
+ * - Address: Ethereum contract address 
+ * - Decimals: Token precision (typically 18 for ERC-20, 6 for USDC)
+ * 
+ * The module also provides helper functions to look up tokens by address or symbol.
+ */
+
 export interface Token {
   symbol: string;
   name: string;

@@ -2,6 +2,20 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * TokenSelector.tsx - Token selection modal component
+ * 
+ * This component provides a modal dialog for users to select tokens during swap operations.
+ * Key features:
+ * - Displays a filterable list of supported tokens
+ * - Shows live token balances for the connected wallet
+ * - Allows searching by token name or symbol
+ * - Highlights the most commonly used tokens
+ * - Supports excluding the currently selected token from the opposite swap field
+ * 
+ * The component is used in the SwapInterface to allow users to select input and output tokens.
+ */
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";

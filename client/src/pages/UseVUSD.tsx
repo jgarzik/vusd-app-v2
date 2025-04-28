@@ -2,6 +2,20 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * UseVUSD.tsx - VUSD usage opportunities page
+ * 
+ * This page showcases various ways users can utilize their VUSD tokens in the DeFi ecosystem.
+ * Key features:
+ * - Opportunity cards showcasing external protocols and platforms
+ * - Educational information about stablecoin yield strategies
+ * - Benefits of VUSD compared to other stablecoins
+ * - Risk considerations for different DeFi strategies
+ * 
+ * The layout places opportunity cards at the top for immediate visibility
+ * with educational content placed below in card format.
+ */
+
 import OpportunitiesRow from "@/components/usevusd/OpportunitiesRow";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 

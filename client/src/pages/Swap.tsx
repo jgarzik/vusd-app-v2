@@ -2,6 +2,19 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * Swap.tsx - Main token swap page
+ * 
+ * This page serves as the primary entry point for users to swap between VUSD and supported stablecoins.
+ * It provides a structured layout with:
+ * - The main swap interface for token conversion
+ * - A treasury summary card showing key metrics
+ * - Opportunity cards showcasing places to use VUSD
+ * 
+ * The layout is responsive, shifting from a two-column layout on desktop to a single column on mobile.
+ * Optimized spacing has been implemented between the swap interface and opportunity cards.
+ */
+
 import SwapInterface from "@/components/swap/SwapInterface";
 import TreasuryCard from "@/components/analytics/TreasuryCard";
 import OpportunitiesRow from "@/components/usevusd/OpportunitiesRow";
