@@ -2,6 +2,22 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * Analytics.tsx - Dashboard for VUSD treasury analytics
+ * 
+ * This page provides comprehensive visualizations and data insights for the VUSD treasury.
+ * Key features:
+ * - Treasury composition breakdown (T1 and T2 assets)
+ * - Collateralization ratio monitoring
+ * - Detailed asset listings with real-time values
+ * - Interactive visualizations using recharts
+ * 
+ * The analytics are designed to provide transparency about the backing assets of VUSD,
+ * showing how the stablecoin maintains its peg through a diversified portfolio of assets.
+ * T1 assets (stablecoins) are shown separately from T2 assets (stETH, LP tokens) to clearly
+ * communicate the risk profile of the treasury.
+ */
+
 import TreasuryCard from "@/components/analytics/TreasuryCard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

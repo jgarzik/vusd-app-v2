@@ -2,6 +2,21 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * TreasuryCard.tsx - VUSD treasury summary component
+ * 
+ * This component displays a concise summary of the VUSD treasury's key metrics:
+ * - Total treasury value with collateralization ratio
+ * - T1 stablecoin assets breakdown (USDC, DAI, USDT)
+ * - T2 alternative assets breakdown (stETH, LP tokens)
+ * 
+ * The component has two display modes:
+ * - Preview mode: Compact version for display on the main swap page with "View All" link
+ * - Full mode: Complete version shown on the analytics page
+ * 
+ * Real-time data is fetched via the useTreasury hook with proper loading states.
+ */
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "wouter";
