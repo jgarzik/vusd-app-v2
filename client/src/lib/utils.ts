@@ -2,6 +2,21 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * utils.ts - General utility functions for the VUSD application
+ * 
+ * This module provides essential utility functions used throughout the application:
+ * - Class name merging for conditional Tailwind CSS classes
+ * - Ethereum address formatting for display purposes
+ * - Number formatting utilities for currency and token amounts
+ * - Exchange rate calculations for the swap interface
+ * - Copy to clipboard functionality
+ * - Input validation and parsing
+ * 
+ * These functions encapsulate common operations to ensure consistency
+ * and reduce code duplication across components.
+ */
+
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 

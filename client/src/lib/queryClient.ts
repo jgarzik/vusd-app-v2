@@ -2,6 +2,20 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * queryClient.ts - API request and data fetching utilities
+ * 
+ * This module provides the central configuration for TanStack Query (React Query)
+ * and API request utilities. Key features include:
+ * - Configuring the global query client with proper defaults
+ * - Helper functions for making API requests with consistent error handling
+ * - Type-safe query function generation
+ * - Authentication error handling with customizable behavior
+ * 
+ * The module unifies all data fetching patterns to maintain consistent
+ * loading states, error handling, and caching behavior across the application.
+ */
+
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {

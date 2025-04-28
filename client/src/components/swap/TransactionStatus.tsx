@@ -2,6 +2,22 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * TransactionStatus.tsx - Transaction status modal component
+ * 
+ * This component displays the status of blockchain transactions during token swaps.
+ * It provides visual feedback for:
+ * - Pending transactions with a loading spinner
+ * - Successful transactions with a confirmation message and details
+ * - Failed transactions with error information
+ * 
+ * The modal includes:
+ * - Transaction summary (from token, to token, amounts)
+ * - Transaction hash with Etherscan link for verification
+ * - Appropriate status icons and colors based on transaction state
+ * - Close button to dismiss after completion
+ */
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { formatAmount } from "@/lib/utils";

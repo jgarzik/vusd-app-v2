@@ -2,6 +2,20 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * Header.tsx - Application header component
+ * 
+ * This component provides the main navigation header for the VUSD application.
+ * Key features:
+ * - VUSD logo and branding
+ * - Main navigation links to key sections (Swap, Analytics, UseVUSD)
+ * - Wallet connection button with connection status
+ * - Responsive design with mobile-friendly menu
+ * 
+ * The header maintains the active route highlighting and serves as the primary
+ * navigation control center for the entire application.
+ */
+
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import ConnectWallet from "@/components/web3/ConnectWallet";

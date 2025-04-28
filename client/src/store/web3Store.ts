@@ -2,6 +2,20 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * web3Store.ts - Global Web3 state management
+ * 
+ * This module manages the global state for Web3 connections in the VUSD application.
+ * It uses Zustand for state management to provide:
+ * - Connection state (connected, connecting, disconnected)
+ * - User wallet address and chain information
+ * - Error handling for connection issues
+ * - Methods to update the connection state
+ * 
+ * The store centralizes all Web3 state to avoid duplicating wallet connection logic
+ * across components and ensures consistency throughout the application.
+ */
+
 import { create } from 'zustand';
 import { ethers } from 'ethers';
 
