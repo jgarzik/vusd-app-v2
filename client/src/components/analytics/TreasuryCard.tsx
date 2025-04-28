@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "wouter";
 import { useTreasury } from "@/hooks/useTreasury";
 import { formatCurrency } from "@/lib/utils";
+import { Shield, Coins, ArrowUpCircle } from "lucide-react";
 
 interface TreasuryCardProps {
   previewMode?: boolean;
@@ -17,14 +18,16 @@ const TreasuryCard = ({ previewMode = false }: TreasuryCardProps) => {
       case 'USDT': return 'token-icon-usdt';
       case 'DAI': return 'token-icon-dai';
       case 'VUSD': return 'token-icon-vusd';
+      case 'stETH': return 'bg-blue-500';
+      case 'VUSD/ETH LP': return 'bg-purple-500';
       default: return 'bg-gray-500';
     }
   };
   
   return (
-    <Card className="bg-card rounded-xl overflow-hidden">
+    <Card className="bg-card rounded-xl overflow-hidden h-full">
       <CardHeader className="px-5 py-4 border-b border-gray-800 flex justify-between items-center">
-        <CardTitle className="font-heading font-semibold">VUSD Analytics</CardTitle>
+        <CardTitle className="font-heading font-semibold">VUSD Treasury</CardTitle>
         {previewMode && (
           <Link href="/analytics">
             <a className="text-primary hover:text-primary-light text-sm font-medium">View More</a>
@@ -34,31 +37,30 @@ const TreasuryCard = ({ previewMode = false }: TreasuryCardProps) => {
       <CardContent className="p-5">
         <div className="flex flex-col space-y-6">
           {/* Treasury Stats */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-background-light p-3 rounded-lg">
-              <div className="text-gray-400 text-sm mb-1">Treasury Value</div>
-              <div className="text-xl font-medium">
-                {loading ? "Loading..." : formatCurrency(treasuryData.totalValue)}
+          <div className="grid grid-cols-1 gap-4">
+            <div className="bg-background-light p-4 rounded-lg">
+              <div className="flex items-center mb-1">
+                <ArrowUpCircle className="w-4 h-4 text-green-500 mr-2" />
+                <div className="text-gray-400 text-sm">Excess Value</div>
               </div>
-            </div>
-            
-            <div className="bg-background-light p-3 rounded-lg">
-              <div className="text-gray-400 text-sm mb-1">VUSD Supply</div>
               <div className="text-xl font-medium">
-                {loading ? "Loading..." : formatCurrency(treasuryData.circulatingSupply)}
+                {loading ? "Loading..." : formatCurrency(treasuryData.excessValue)}
+              </div>
+              <div className="text-xs text-gray-400 mt-1">
+                Treasury value in excess of VUSD supply
               </div>
             </div>
           </div>
           
           {/* Collateralization Ratio */}
-          <div className="bg-background-light p-3 rounded-lg">
-            <div className="text-gray-400 text-sm mb-1">Collateralization Ratio</div>
+          <div className="bg-background-light p-4 rounded-lg">
+            <div className="flex items-center mb-1">
+              <Shield className="w-4 h-4 text-primary mr-2" />
+              <div className="text-gray-400 text-sm">Collateralization Ratio</div>
+            </div>
             <div className="flex items-end">
               <div className="text-xl font-medium">
                 {loading ? "Loading..." : `${(treasuryData.collateralizationRatio * 100).toFixed(2)}%`}
-              </div>
-              <div className="text-sm text-gray-400 ml-2 mb-0.5">
-                (target: 100%)
               </div>
             </div>
             
@@ -72,23 +74,68 @@ const TreasuryCard = ({ previewMode = false }: TreasuryCardProps) => {
                 ></div>
               </div>
             )}
+            
+            <div className="grid grid-cols-2 gap-2 mt-3">
+              <div>
+                <div className="text-xs text-gray-400">Treasury Value</div>
+                <div className="text-sm font-medium">
+                  {loading ? "Loading..." : formatCurrency(treasuryData.totalValue)}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-400">VUSD Supply</div>
+                <div className="text-sm font-medium">
+                  {loading ? "Loading..." : formatCurrency(treasuryData.circulatingSupply)}
+                </div>
+              </div>
+            </div>
           </div>
           
-          {/* Asset Distribution */}
+          {/* T1 Assets - Whitelisted Stablecoins */}
           <div>
-            <div className="text-gray-400 text-sm mb-2">Asset Distribution</div>
+            <div className="flex items-center mb-2">
+              <Coins className="w-4 h-4 text-blue-400 mr-2" />
+              <div className="text-gray-300 text-sm font-medium">T1: Stablecoins</div>
+              <div className="ml-auto text-sm">{loading ? "..." : formatCurrency(treasuryData.t1Value)}</div>
+            </div>
             {loading ? (
-              <div className="text-center py-4 text-gray-400">Loading treasury data...</div>
+              <div className="text-center py-4 text-gray-400">Loading...</div>
             ) : (
-              <div className="flex flex-col space-y-3">
-                {treasuryData.assets.map((asset) => (
-                  <div key={asset.symbol} className="bg-background-light p-3 rounded-lg">
+              <div className="flex flex-col space-y-1.5">
+                {treasuryData.t1Assets.map((asset) => (
+                  <div key={asset.symbol} className="bg-background-light p-2.5 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <div className={`w-5 h-5 rounded-full overflow-hidden ${getTokenIconClass(asset.symbol)} mr-2`}></div>
-                        <span className="text-sm font-medium">{asset.symbol}</span>
+                        <div className={`w-4 h-4 rounded-full overflow-hidden ${getTokenIconClass(asset.symbol)} mr-2`}></div>
+                        <span className="text-xs font-medium">{asset.symbol}</span>
                       </div>
-                      <div className="text-sm font-medium">{formatCurrency(asset.value)}</div>
+                      <div className="text-xs font-medium">{formatCurrency(asset.value)}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {/* T2 Assets - Other Assets */}
+          <div>
+            <div className="flex items-center mb-2">
+              <Coins className="w-4 h-4 text-purple-400 mr-2" />
+              <div className="text-gray-300 text-sm font-medium">T2: Other Assets</div>
+              <div className="ml-auto text-sm">{loading ? "..." : formatCurrency(treasuryData.t2Value)}</div>
+            </div>
+            {loading ? (
+              <div className="text-center py-4 text-gray-400">Loading...</div>
+            ) : (
+              <div className="flex flex-col space-y-1.5">
+                {treasuryData.t2Assets.map((asset) => (
+                  <div key={asset.symbol} className="bg-background-light p-2.5 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className={`w-4 h-4 rounded-full overflow-hidden ${getTokenIconClass(asset.symbol)} mr-2`}></div>
+                        <span className="text-xs font-medium">{asset.symbol}</span>
+                      </div>
+                      <div className="text-xs font-medium">{formatCurrency(asset.value)}</div>
                     </div>
                   </div>
                 ))}
