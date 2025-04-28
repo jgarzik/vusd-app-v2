@@ -7,6 +7,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
   });
+  
+  // Expose environment variables needed by the frontend
+  app.get('/api/config', (req, res) => {
+    res.json({
+      walletConnectProjectId: process.env.WALLETCONNECT_PROJECT_ID || ''
+    });
+  });
 
   // Set up HTTP server
   const httpServer = createServer(app);

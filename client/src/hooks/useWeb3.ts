@@ -7,10 +7,23 @@ export const useWeb3 = () => {
   const { disconnect } = useDisconnect();
 
   const formattedConnectors = useMemo(() => {
-    return connectors.map((connector) => ({
-      id: connector.id,
-      name: connector.id === 'injected' ? 'MetaMask' : 'WalletConnect',
-    }));
+    return connectors.map((connector) => {
+      // Properly identify each connector type
+      let name = connector.name;
+      
+      // Override generic names with more user-friendly ones
+      if (connector.id === 'injected') {
+        name = 'MetaMask';
+      } else if (connector.id === 'walletConnect') {
+        name = 'WalletConnect';
+      }
+
+      return {
+        id: connector.id,
+        name,
+        type: connector.type,
+      };
+    });
   }, [connectors]);
   
   return {
