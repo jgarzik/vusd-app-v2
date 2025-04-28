@@ -30,6 +30,26 @@ import { parseUnits } from 'ethers/lib/utils';
 type TokenBalances = Record<string, number>;
 type SwapDirection = 'toVUSD' | 'fromVUSD';
 
+/**
+ * Custom hook providing token swap functionality between VUSD and stablecoins.
+ * 
+ * @returns {Object} Swap state and functions
+ * @property {Object} balances - Current token balances for the connected wallet
+ * @property {string} inputToken - Selected input token symbol
+ * @property {string} outputToken - Selected output token symbol
+ * @property {number} inputAmount - Amount to swap in human-readable format
+ * @property {number} outputAmount - Expected output amount in human-readable format
+ * @property {number} fee - Current fee percentage for the selected swap
+ * @property {boolean} loading - Whether a swap operation is in progress
+ * @property {Function} setInputToken - Function to change the input token
+ * @property {Function} setOutputToken - Function to change the output token
+ * @property {Function} setInputAmount - Function to update the input amount
+ * @property {Function} setOutputAmount - Function to update the output amount
+ * @property {Function} swapTokens - Function to reverse the swap direction
+ * @property {Function} executeSwap - Function to perform the swap transaction
+ * @property {Function} estimateSwap - Function to calculate expected output amount
+ * @property {Function} refreshBalances - Function to refresh token balances
+ */
 export const useSwap = () => {
   const { toast } = useToast();
   const { address, isConnected } = useWeb3();
@@ -49,24 +69,63 @@ export const useSwap = () => {
   const [fee, setFee] = useState<number>(0.003); // Default 0.3% fee
   const [loading, setLoading] = useState<boolean>(false);
   
-  // Get token decimal places
+  /**
+   * Retrieves the number of decimal places for a given token symbol.
+   * 
+   * @param symbol - The token symbol to look up (e.g., "VUSD", "USDC")
+   * @returns The number of decimal places for the token, defaults to 18 if not found
+   * 
+   * @remarks
+   * This is crucial for proper numeric conversions as different tokens use
+   * different decimal precisions (e.g., USDC uses 6 decimals while VUSD uses 18)
+   */
   const getTokenDecimals = useCallback((symbol: string) => {
     const token = SUPPORTED_TOKENS.find(t => t.symbol === symbol);
     return token?.decimals || 18;
   }, []);
   
-  // Get token address
+  /**
+   * Retrieves the blockchain contract address for a given token symbol.
+   * 
+   * @param symbol - The token symbol to look up (e.g., "VUSD", "USDC")
+   * @returns The Ethereum address of the token contract, or empty string if not found
+   * 
+   * @example
+   * const usdcAddress = getTokenAddress("USDC");
+   * // Returns "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" (USDC address)
+   */
   const getTokenAddress = useCallback((symbol: string) => {
     const token = SUPPORTED_TOKENS.find(t => t.symbol === symbol);
     return token?.address || '';
   }, []);
   
-  // Get swap direction
+  /**
+   * Determines the swap direction based on the output token.
+   * 
+   * @returns SwapDirection - 'toVUSD' if outputToken is VUSD, 'fromVUSD' otherwise
+   * 
+   * @remarks
+   * This is used to determine which contract to call:
+   * - 'toVUSD' uses the Minter contract (stablecoin → VUSD)
+   * - 'fromVUSD' uses the Redeemer contract (VUSD → stablecoin)
+   */
   const getSwapDirection = useCallback((): SwapDirection => {
     return outputToken === 'VUSD' ? 'toVUSD' : 'fromVUSD';
   }, [outputToken]);
   
-  // Fetch token balances
+  /**
+   * Fetches token balances for all supported tokens from the blockchain.
+   * 
+   * @async
+   * @returns {Promise<void>}
+   * 
+   * @remarks
+   * This function retrieves balances for all supported tokens (VUSD, USDC, USDT, DAI)
+   * using the appropriate contract calls. It handles each token's specific decimal precision
+   * and updates the balances state with human-readable numeric values.
+   * 
+   * @throws Logs errors to console but doesn't propagate them to prevent UI disruption
+   */
   const fetchBalances = useCallback(async () => {
     if (!isConnected || !address) return;
     
@@ -92,7 +151,25 @@ export const useSwap = () => {
     }
   }, [address, isConnected, contracts, balances]);
   
-  // Estimate swap output
+  /**
+   * Calculates the expected output amount for a given swap.
+   * 
+   * @async
+   * @param amount - The input amount to swap
+   * @param fromToken - The token symbol being swapped from
+   * @param toToken - The token symbol being swapped to
+   * @returns {Promise<void>} - Updates state with output amount and fee
+   * 
+   * @remarks
+   * This function performs different calculations based on swap direction:
+   * - For toVUSD: Calls Minter.calculateMintage with 0.01% fee
+   * - For fromVUSD: Calls Redeemer.redeemable with 0.1% fee
+   * 
+   * The output amounts are converted to human-readable numbers with appropriate decimal
+   * precision for each token. Fees are retrieved from the contracts and stored as percentages.
+   * 
+   * @throws Displays a toast notification to the user on errors
+   */
   const estimateSwap = useCallback(async (amount: number, fromToken: string, toToken: string) => {
     if (!amount || amount <= 0) {
       setOutputAmount(0);
@@ -144,7 +221,35 @@ export const useSwap = () => {
     }
   }, [contracts, getTokenAddress, getTokenDecimals, toast]);
   
-  // Execute swap
+  /**
+   * Executes a token swap transaction, handling approvals and blockchain interactions.
+   * 
+   * @async
+   * @returns {Promise<ethers.TransactionResponse>} The transaction response object
+   * 
+   * @remarks
+   * This function handles the complete swap workflow:
+   * 1. Validates connection state and input amount
+   * 2. Determines swap direction (toVUSD or fromVUSD)
+   * 3. Checks token allowance and requests approval if needed
+   * 4. Executes the appropriate contract call (mint or redeem)
+   * 5. Waits for transaction confirmation
+   * 6. Updates token balances after successful transaction
+   * 
+   * For toVUSD swaps, it calls the Minter.mint function.
+   * For fromVUSD swaps, it calls the Redeemer.redeem function.
+   * 
+   * @throws {Error} If wallet is not connected or amount is invalid
+   * @throws Propagates any blockchain errors to the caller for handling
+   * 
+   * @example
+   * try {
+   *   const tx = await executeSwap();
+   *   console.log("Swap successful:", tx.hash);
+   * } catch (error) {
+   *   console.error("Swap failed:", error);
+   * }
+   */
   const executeSwap = useCallback(async () => {
     if (!isConnected || !address) {
       throw new Error('Wallet not connected');
@@ -225,14 +330,28 @@ export const useSwap = () => {
     fetchBalances
   ]);
   
-  // Load initial data
+  /**
+   * Automatically loads token balances when wallet connection changes.
+   * 
+   * This effect runs when the wallet connection state changes,
+   * ensuring balances are immediately available when a user connects.
+   */
   useEffect(() => {
     if (isConnected) {
       fetchBalances();
     }
   }, [isConnected, fetchBalances]);
   
-  // Swap tokens positions
+  /**
+   * Swaps the positions of input and output tokens and their amounts.
+   * 
+   * @returns {void}
+   * 
+   * @remarks
+   * This is a convenience function allowing users to quickly reverse
+   * their swap direction by flipping the input and output tokens.
+   * It maintains the amounts so the user sees the inverse rate immediately.
+   */
   const swapTokens = useCallback(() => {
     setInputToken(outputToken);
     setOutputToken(inputToken);
