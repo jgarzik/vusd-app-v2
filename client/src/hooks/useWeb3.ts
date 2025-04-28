@@ -19,6 +19,32 @@
 import { useMemo } from 'react';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 
+/**
+ * Custom hook providing wallet connectivity and state for the application.
+ * 
+ * @returns {Object} Wallet state and functions
+ * @property {string|undefined} address - Current connected wallet address, undefined if not connected
+ * @property {boolean} isConnected - Whether a wallet is currently connected
+ * @property {boolean} isConnecting - Whether a connection is in progress
+ * @property {Function} connect - Function to connect to a specific wallet type
+ * @property {Function} disconnect - Function to disconnect the current wallet
+ * @property {Array} connectors - Available wallet connection options with formatted names
+ * 
+ * @remarks
+ * This hook abstracts away the underlying Web3 connection library (wagmi) to provide:
+ * - Simple connection methods for multiple wallet types
+ * - Consistent connection state management
+ * - User-friendly wallet connector labels
+ * 
+ * @example
+ * const { address, isConnected, connect, disconnect } = useWeb3();
+ * 
+ * // Connect to MetaMask
+ * connect('injected');
+ * 
+ * // Disconnect current wallet
+ * disconnect();
+ */
 export const useWeb3 = () => {
   const { address, isConnected } = useAccount();
   const { connect, connectors, isPending } = useConnect();

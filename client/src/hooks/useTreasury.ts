@@ -45,6 +45,22 @@ interface TreasuryData {
   t2Assets: TreasuryAsset[]; // Tranche 2 assets (other assets in treasury)
 }
 
+/**
+ * Custom hook providing access to VUSD treasury data and valuation.
+ * 
+ * @returns {Object} Treasury state and functions
+ * @property {TreasuryData} treasuryData - Comprehensive treasury valuation data
+ * @property {boolean} loading - Whether treasury data is being fetched
+ * @property {Function} refreshTreasuryData - Function to manually refresh treasury data
+ *
+ * @remarks
+ * This hook is a critical part of the Analytics page functionality:
+ * - Provides complete breakdown of all assets in the treasury
+ * - Calculates collateralization ratio and excess value
+ * - Organizes assets into T1 (whitelisted stables) and T2 (other assets)
+ * - Implements specialized valuation logic for different asset types
+ * - Prevents double-counting VUSD in LP token pairs
+ */
 export const useTreasury = () => {
   const { toast } = useToast();
   const { contracts } = useEthersContracts();
@@ -70,7 +86,18 @@ export const useTreasury = () => {
   
   // Using T2_ASSETS and AssetType imported from constants/treasuryAssets.ts
   
-  // Function to fetch price of ETH in USD using CoinGecko API
+  /**
+   * Fetches the current ETH price in USD from the CoinGecko API.
+   * 
+   * @async
+   * @returns {Promise<number>} The current price of ETH in USD
+   * 
+   * @remarks
+   * This function queries the CoinGecko API to get real-time ETH pricing data.
+   * Used for valuing ETH-based assets in the treasury (stETH, LP tokens).
+   * 
+   * @throws Logs error to console and returns a fallback value of $3500 if API call fails
+   */
   const fetchEthPrice = async (): Promise<number> => {
     try {
       const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
@@ -83,7 +110,24 @@ export const useTreasury = () => {
     }
   };
   
-  // Specialized function to value stETH assets
+  /**
+   * Calculates the USD value of staked ETH (stETH) assets in the treasury.
+   * 
+   * @async
+   * @param tokenContract - The stETH token contract instance
+   * @param tokenBalance - The raw balance of stETH tokens
+   * @param ethPrice - The current ETH price in USD
+   * @param decimals - The number of decimals for the token
+   * @returns {Promise<{value: number, balance: number}>} The USD value and human-readable balance
+   * 
+   * @remarks
+   * This specialized function handles Lido stETH valuation by:
+   * 1. Converting raw token balance to a human-readable number
+   * 2. Using Lido's getPooledEthByShares method to determine the actual ETH equivalent
+   * 3. Multiplying by the current ETH price to get USD value
+   * 
+   * The stETH to ETH ratio changes over time as staking rewards accrue.
+   */
   const valueStakedEthAsset = async (
     tokenContract: ethers.Contract,
     tokenBalance: bigint,
@@ -109,7 +153,26 @@ export const useTreasury = () => {
     return { value, balance };
   };
   
-  // Specialized function to value LP tokens
+  /**
+   * Calculates the USD value of LP tokens in the treasury with special handling for VUSD pairs.
+   * 
+   * @async
+   * @param tokenContract - The LP token contract instance
+   * @param tokenBalance - The raw balance of LP tokens
+   * @param ethPrice - The current ETH price in USD
+   * @param decimals - The number of decimals for the token
+   * @returns {Promise<{value: number, balance: number}>} The USD value and human-readable balance
+   * 
+   * @remarks
+   * This function handles SushiSwap LP token valuation with a critical enhancement:
+   * - For LP tokens containing VUSD, only the non-VUSD side is counted to avoid double-counting
+   * - This is a key fix to ensure accurate treasury valuation
+   * 
+   * The process includes:
+   * 1. Calculating treasury's ownership percentage of the LP token
+   * 2. Identifying the token pair composition
+   * 3. Determining USD values based on token types (stablecoins vs. ETH-based assets)
+   */
   const valueLpTokenAsset = async (
     tokenContract: ethers.Contract,
     tokenBalance: bigint,
@@ -189,7 +252,23 @@ export const useTreasury = () => {
     return { value, balance };
   };
   
-  // Generic function for other ERC20 tokens
+  /**
+   * Calculates the USD value of generic ERC20 tokens in the treasury.
+   * 
+   * @async
+   * @param tokenContract - The token contract instance
+   * @param tokenBalance - The raw balance of tokens
+   * @param decimals - The number of decimals for the token
+   * @returns {Promise<{value: number, balance: number}>} The USD value and human-readable balance
+   * 
+   * @remarks
+   * This function handles valuation of standard ERC20 tokens not covered by specialized functions.
+   * In a production environment, this would integrate with a price oracle service.
+   * 
+   * @note The current implementation uses a simplified placeholder valuation.
+   * In a production environment, this should be replaced with a proper oracle
+   * to get accurate market prices for the tokens.
+   */
   const valueGenericErc20Asset = async (
     tokenContract: ethers.Contract,
     tokenBalance: bigint,
@@ -205,6 +284,26 @@ export const useTreasury = () => {
     return { value, balance };
   };
 
+  /**
+   * Fetches and processes all treasury assets and calculates key metrics.
+   * 
+   * @async
+   * @returns {Promise<void>} - Updates treasuryData state with complete treasury information
+   * 
+   * @remarks
+   * This comprehensive function performs the following steps:
+   * 1. Fetches VUSD circulating supply
+   * 2. Retrieves and values all T1 assets (whitelisted stablecoins)
+   * 3. Retrieves and values all T2 assets (non-whitelisted assets)
+   * 4. Calculates collateralization ratio and excess value
+   * 
+   * Each asset type uses specialized valuation logic appropriate to its nature:
+   * - Stablecoins: 1:1 with USD
+   * - stETH: Current ETH equivalent * ETH price
+   * - LP tokens: Ownership percentage of reserves with special handling for VUSD pairs
+   * 
+   * @throws Displays toast notification on error and logs details to console
+   */
   const fetchTreasuryData = useCallback(async () => {
     if (!contracts.treasury || !contracts.vusd) {
       return;
@@ -381,6 +480,17 @@ export const useTreasury = () => {
     }
   }, [contracts.treasury, contracts.vusd, toast]);
   
+  /**
+   * Initialize treasury data when the component mounts.
+   * 
+   * @remarks
+   * This effect handles initial data loading:
+   * 1. Initial placeholder data is already set in the useState default value
+   * 2. Immediately triggers fetchTreasuryData to load real blockchain data
+   * 3. Does not set up an auto-refresh interval to minimize blockchain interactions
+   * 
+   * Users can manually refresh data by calling refreshTreasuryData.
+   */
   useEffect(() => {
     // Initial data is already set in useState
     setLoading(false);
