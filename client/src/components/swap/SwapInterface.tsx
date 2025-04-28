@@ -156,8 +156,8 @@ const SwapInterface = () => {
 
   return (
     <>
-      <div className="swap-container mb-6">
-        <div className="swap-header">
+      <div className="swap-container mb-8">
+        <div className="px-6 py-4 border-b border-gray-800">
           <h2 className="font-heading font-semibold text-xl">Swap</h2>
           <p className="text-gray-400 text-sm mt-1">
             {outputToken === 'VUSD' 
@@ -166,10 +166,10 @@ const SwapInterface = () => {
           </p>
         </div>
         
-        <div className="swap-content">
+        <div className="p-6">
           {/* From Token Input */}
-          <div className="bg-secondary token-input">
-            <div className="flex justify-between items-center mb-1">
+          <div className="bg-background-light rounded-xl p-4 mb-2">
+            <div className="flex justify-between items-center mb-2">
               <label className="text-sm text-gray-400">From</label>
               <div className="text-sm text-gray-400">
                 Balance: <span>{isConnected ? formatAmount(balances[inputToken] || 0, getTokenDecimals(inputToken)) : "-"}</span>
@@ -180,22 +180,22 @@ const SwapInterface = () => {
               <Input
                 type="number"
                 placeholder="0.0"
-                className="bg-transparent text-lg font-medium w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                className="bg-transparent text-xl font-medium w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 value={inputAmount || ""}
                 onChange={handleInputChange}
               />
               
               <button 
-                className="ml-2 bg-background px-2 py-1.5 rounded-xl flex items-center"
+                className="ml-2 bg-background px-3 py-2 rounded-xl flex items-center"
                 onClick={() => openTokenSelector("input")}
               >
-                <div className={`w-5 h-5 rounded-full overflow-hidden ${getTokenIconClass(inputToken)} mr-1.5 flex items-center justify-center`}>
+                <div className={`w-6 h-6 rounded-full overflow-hidden ${getTokenIconClass(inputToken)} mr-2 flex items-center justify-center`}>
                   <span className="text-xs font-bold">
                     {inputToken === "VUSD" ? "V" : "$"}
                   </span>
                 </div>
                 <span className="font-medium">{inputToken}</span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </button>
@@ -203,18 +203,18 @@ const SwapInterface = () => {
           </div>
           
           {/* Swap Direction Button */}
-          <div className="flex justify-center -my-2 relative z-10">
+          <div className="flex justify-center -my-3 relative z-10">
             <button 
-              className="bg-secondary w-8 h-8 rounded-xl border border-gray-700 flex items-center justify-center hover:bg-gray-700 transition-colors"
+              className="bg-background-light w-10 h-10 rounded-xl border border-gray-700 flex items-center justify-center hover:bg-gray-700 transition-colors"
               onClick={switchTokens}
             >
-              <ArrowDown className="h-4 w-4 text-gray-400" />
+              <ArrowDown className="h-5 w-5 text-gray-400" />
             </button>
           </div>
           
           {/* To Token Input */}
-          <div className="bg-secondary token-input mt-2 mb-3">
-            <div className="flex justify-between items-center mb-1">
+          <div className="bg-background-light rounded-xl p-4 mt-2 mb-4">
+            <div className="flex justify-between items-center mb-2">
               <label className="text-sm text-gray-400">To</label>
               <div className="text-sm text-gray-400">
                 Balance: <span>{isConnected ? formatAmount(balances[outputToken] || 0, getTokenDecimals(outputToken)) : "-"}</span>
@@ -225,23 +225,23 @@ const SwapInterface = () => {
               <Input
                 type="number"
                 placeholder="0.0"
-                className="bg-transparent text-lg font-medium w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                className="bg-transparent text-xl font-medium w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 value={outputAmount || ""}
                 onChange={handleOutputChange}
                 readOnly={true}
               />
               
               <button 
-                className="ml-2 bg-background px-2 py-1.5 rounded-xl flex items-center"
+                className="ml-2 bg-background px-3 py-2 rounded-xl flex items-center"
                 onClick={() => openTokenSelector("output")}
               >
-                <div className={`w-5 h-5 rounded-full overflow-hidden ${getTokenIconClass(outputToken)} mr-1.5 flex items-center justify-center`}>
+                <div className={`w-6 h-6 rounded-full overflow-hidden ${getTokenIconClass(outputToken)} mr-2 flex items-center justify-center`}>
                   <span className="text-xs font-bold">
                     {outputToken === "VUSD" ? "V" : "$"}
                   </span>
                 </div>
                 <span className="font-medium">{outputToken}</span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </button>
@@ -249,7 +249,7 @@ const SwapInterface = () => {
           </div>
           
           {/* Exchange Rate & Fee Info */}
-          <div className="token-details text-xs">
+          <div className="text-sm mb-4">
             <div className="flex justify-between items-center mb-1">
               <span className="text-gray-400">Exchange Rate</span>
               <span className="text-gray-300">
@@ -279,7 +279,7 @@ const SwapInterface = () => {
           
           {/* Swap Button */}
           <Button
-            className="w-full font-medium rounded-xl py-5 text-sm"
+            className="w-full font-medium rounded-xl py-6 text-base"
             onClick={handleSwap}
             disabled={!isConnected || loading || !inputAmount || inputAmount <= 0}
           >

@@ -10,25 +10,20 @@ const Swap = () => {
   return (
     <div className="container mx-auto px-4">
       <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto">
-        {/* Left column - Swap Interface - reduced width on large screens */}
-        <div className="w-full lg:w-5/12 xl:w-4/12">
-          <div className="max-w-md mx-auto lg:mx-0">
-            <SwapInterface />
+        {/* Left column - Swap Interface */}
+        <div className="w-full lg:w-8/12">
+          <SwapInterface />
+          
+          {/* Bottom section with opportunity cards - reduced vertical gap */}
+          <div className="mt-3">
+            <OpportunitiesRow showViewAll={true} />
           </div>
         </div>
         
         {/* Right column - Treasury Analytics */}
-        <div className="w-full lg:w-7/12 xl:w-8/12">
-          <div className="flex flex-col space-y-5">
-            {/* Treasury card */}
-            <div className="max-w-md lg:max-w-none mx-auto">
-              <TreasuryCard previewMode={true} />
-            </div>
-            
-            {/* Opportunity cards */}
-            <div className="mt-3">
-              <OpportunitiesRow showViewAll={true} />
-            </div>
+        <div className="w-full lg:w-4/12 lg:mt-0">
+          <div className="sticky top-24 max-w-xs mx-auto lg:mx-0">
+            <TreasuryCard previewMode={true} />
           </div>
         </div>
       </div>
