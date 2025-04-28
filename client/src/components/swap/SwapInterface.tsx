@@ -157,8 +157,8 @@ const SwapInterface = () => {
           <h2 className="font-heading font-semibold text-xl">Swap</h2>
           <p className="text-gray-400 text-sm mt-1">
             {outputToken === 'VUSD' 
-              ? 'Mint VUSD by depositing stablecoins (0.01% fee)' 
-              : 'Redeem VUSD for stablecoins (0.1% fee)'}
+              ? 'Swap stablecoins for VUSD (0.01% fee)' 
+              : 'Swap VUSD for stablecoins (0.1% fee)'}
           </p>
         </div>
         
@@ -284,8 +284,8 @@ const SwapInterface = () => {
               : loading 
                 ? "Loading..." 
                 : outputToken === 'VUSD'
-                  ? `Mint VUSD with ${inputToken}`
-                  : `Redeem VUSD for ${outputToken}`}
+                  ? `Swap ${inputToken} for VUSD`
+                  : `Swap VUSD for ${outputToken}`}
           </Button>
         </div>
       </div>

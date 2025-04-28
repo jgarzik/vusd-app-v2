@@ -51,35 +51,26 @@ const TransactionStatus = ({
   };
 
   const getStatusTitle = () => {
-    const isMinting = toToken.symbol === 'VUSD';
-    const operation = isMinting ? 'Mint' : 'Redeem';
-    
     switch (status) {
       case "pending":
-        return `${operation} Transaction Pending`;
+        return `Swap Transaction Pending`;
       case "success":
-        return `${operation} Transaction Successful`;
+        return `Swap Transaction Successful`;
       case "error":
-        return `${operation} Transaction Failed`;
+        return `Swap Transaction Failed`;
       default:
         return "";
     }
   };
 
   const getStatusDescription = () => {
-    const isMinting = toToken.symbol === 'VUSD';
-    
     switch (status) {
       case "pending":
         return "Your transaction is being processed on the blockchain";
       case "success":
-        if (isMinting) {
-          return `You've successfully minted ${formatAmount(toAmount, toToken.decimals, true)} ${toToken.symbol} with ${formatAmount(fromAmount, fromToken.decimals, true)} ${fromToken.symbol}`;
-        } else {
-          return `You've successfully redeemed ${formatAmount(fromAmount, fromToken.decimals, true)} ${fromToken.symbol} for ${formatAmount(toAmount, toToken.decimals, true)} ${toToken.symbol}`;
-        }
+        return `You've successfully swapped ${formatAmount(fromAmount, fromToken.decimals, true)} ${fromToken.symbol} for ${formatAmount(toAmount, toToken.decimals, true)} ${toToken.symbol}`;
       case "error":
-        return `There was an error ${isMinting ? 'minting VUSD' : 'redeeming VUSD'}`;
+        return `There was an error processing your swap`;
       default:
         return "";
     }
@@ -100,7 +91,7 @@ const TransactionStatus = ({
       <DialogContent className="bg-background-card rounded-2xl max-w-md w-full overflow-hidden border-gray-800">
         <DialogHeader>
           <DialogTitle className="font-heading font-semibold text-lg">
-            {toToken.symbol === 'VUSD' ? 'Mint Status' : 'Redeem Status'}
+            Swap Status
           </DialogTitle>
         </DialogHeader>
         
