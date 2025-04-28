@@ -354,13 +354,10 @@ export const useTreasury = () => {
     // Initial data is already set in useState
     setLoading(false);
     
-    // Fetch real data if needed
+    // Fetch real data only once when the component mounts
     fetchTreasuryData();
     
-    // Set up interval to refresh data
-    const intervalId = setInterval(fetchTreasuryData, 60000); // Refresh every minute
-    
-    return () => clearInterval(intervalId);
+    // No interval refresh - users can manually refresh by reloading the page
   }, [fetchTreasuryData]);
   
   return {
