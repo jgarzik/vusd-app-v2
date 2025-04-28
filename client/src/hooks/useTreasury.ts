@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import { useEthersContracts } from './useEthersContracts';
 import { useToast } from './use-toast';
 import { SUPPORTED_TOKENS } from '@/constants/tokens';
+import { VUSD_ADDRESS } from '@/constants/contracts';
 
 interface TreasuryAsset {
   symbol: string;
@@ -46,6 +47,13 @@ export const useTreasury = () => {
     ]
   });
   
+  // Define asset types for better valuation strategies
+  enum AssetType {
+    STAKED_ETH,
+    LP_TOKEN,
+    GENERIC_ERC20
+  }
+  
   // T2 assets that we know are in the treasury but not in the whitelisted tokens list
   const T2_ASSETS = [
     {
@@ -53,16 +61,127 @@ export const useTreasury = () => {
       symbol: 'stETH',
       name: 'Lido Staked ETH',
       decimals: 18,
-      estimated_value: 125000 // Placeholder value in USD
+      assetType: AssetType.STAKED_ETH,
+      // ABI for stETH specific functions
+      extraAbi: [
+        // Lido's exchange rate function
+        'function getPooledEthByShares(uint256 _sharesAmount) external view returns (uint256)'
+      ]
     },
     {
       address: '0xb90047676cC13e68632c55cB5b7cBd8A4C5A0A8E',
       symbol: 'VUSD/ETH LP',
       name: 'SushiSwap VUSD/ETH LP',
       decimals: 18,
-      estimated_value: 75000 // Placeholder value in USD
+      assetType: AssetType.LP_TOKEN,
+      // ABI for SushiSwap LP specific functions
+      extraAbi: [
+        'function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)',
+        'function token0() external view returns (address)',
+        'function token1() external view returns (address)',
+        'function totalSupply() external view returns (uint256)'
+      ]
     }
   ];
+  
+  // Function to fetch price of ETH in USD using CoinGecko API
+  const fetchEthPrice = async (): Promise<number> => {
+    try {
+      const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+      const data = await response.json();
+      return data.ethereum.usd;
+    } catch (error) {
+      console.error('Error fetching ETH price:', error);
+      // Fallback price if API call fails
+      return 3500;
+    }
+  };
+  
+  // Specialized function to value stETH assets
+  const valueStakedEthAsset = async (
+    tokenContract: ethers.Contract,
+    tokenBalance: bigint,
+    ethPrice: number,
+    decimals: number
+  ): Promise<{ value: number, balance: number }> => {
+    let balance = parseFloat(ethers.formatUnits(tokenBalance, decimals));
+    let ethEquivalent = balance; // Default 1:1
+    
+    // If Lido's specific conversion method is available, use it
+    if (tokenContract.getPooledEthByShares) {
+      try {
+        const result = await tokenContract.getPooledEthByShares(tokenBalance);
+        ethEquivalent = parseFloat(ethers.formatUnits(result, 18));
+      } catch (error) {
+        console.error('Error getting stETH exchange rate:', error);
+      }
+    }
+    
+    // Calculate USD value by multiplying ETH equivalent by ETH price
+    const value = ethEquivalent * ethPrice;
+    
+    return { value, balance };
+  };
+  
+  // Specialized function to value LP tokens
+  const valueLpTokenAsset = async (
+    tokenContract: ethers.Contract,
+    tokenBalance: bigint,
+    ethPrice: number,
+    decimals: number
+  ): Promise<{ value: number, balance: number }> => {
+    const balance = parseFloat(ethers.formatUnits(tokenBalance, decimals));
+    let value = balance * ethPrice / 2; // Default assumption (half ETH, half something else)
+    
+    // If SushiSwap LP token functions are available
+    if (tokenContract.getReserves && tokenContract.totalSupply && 
+        tokenContract.token0 && tokenContract.token1) {
+      try {
+        // Get total supply and calculate ownership percentage
+        const totalSupply = await tokenContract.totalSupply();
+        const oneEther = ethers.parseEther("1.0");
+        const ownershipRatio = tokenBalance.mul(oneEther).div(totalSupply);
+        
+        // Get reserves and token addresses
+        const [reserve0, reserve1] = await tokenContract.getReserves();
+        const token0Address = await tokenContract.token0();
+        const token1Address = await tokenContract.token1();
+        
+        // Determine which token is VUSD and which is ETH
+        const vusdReserve = token0Address.toLowerCase() === VUSD_ADDRESS.toLowerCase() ? 
+          reserve0 : reserve1;
+        const ethReserve = token0Address.toLowerCase() === VUSD_ADDRESS.toLowerCase() ? 
+          reserve1 : reserve0;
+        
+        // Calculate value of owned reserves
+        const ownedVusd = parseFloat(ethers.formatUnits(vusdReserve.mul(ownershipRatio).div(oneEther), 18));
+        const ownedEth = parseFloat(ethers.formatUnits(ethReserve.mul(ownershipRatio).div(oneEther), 18));
+        
+        // Calculate total value (VUSD is 1:1 with USD, ETH uses current price)
+        value = ownedVusd + (ownedEth * ethPrice);
+      } catch (error) {
+        console.error('Error calculating LP token value:', error);
+      }
+    }
+    
+    return { value, balance };
+  };
+  
+  // Generic function for other ERC20 tokens
+  const valueGenericErc20Asset = async (
+    tokenContract: ethers.Contract,
+    tokenBalance: ethers.BigNumber,
+    decimals: number
+  ): Promise<{ value: number, balance: number }> => {
+    const balance = parseFloat(ethers.formatUnits(tokenBalance, decimals));
+    
+    // In a production environment, we would integrate with a price oracle here
+    // For demonstration, we'll use a simple approximation
+    // This should be replaced with a proper oracle in production
+    const value = balance * 10; // Placeholder, replace with price oracle
+    
+    return { value, balance };
+  };
 
   const fetchTreasuryData = useCallback(async () => {
     if (!contracts.treasury || !contracts.vusd) {
@@ -109,52 +228,94 @@ export const useTreasury = () => {
       }
       
       // Add T2 assets (non-whitelisted assets)
-      // In production, we would query the blockchain for these token balances
+      // Fetch the current ETH price in USD once to avoid multiple API calls
+      const ethPrice = await fetchEthPrice();
+      
       for (const t2Asset of T2_ASSETS) {
         try {
-          // Create an ERC20 contract instance for the token
+          // Get the provider from the connected contract
+          const provider = await contracts.treasury.runner?.provider;
+          if (!provider) {
+            throw new Error("Provider not available");
+          }
+          
+          // Basic ERC20 ABI functions + any asset-specific functions
+          const combinedAbi = [
+            'function balanceOf(address owner) view returns (uint256)',
+            'function decimals() view returns (uint8)',
+            ...(t2Asset.extraAbi || [])
+          ];
+          
+          // Create contract instance for the token
           const tokenContract = new ethers.Contract(
             t2Asset.address,
-            [
-              'function balanceOf(address owner) view returns (uint256)',
-              'function decimals() view returns (uint8)'
-            ],
-            new ethers.providers.JsonRpcProvider(process.env.ETHEREUM_RPC_URL)
+            combinedAbi,
+            provider
           );
           
-          // For demonstration purposes, we're still using the hardcoded values
-          // In production, we would uncomment this code:
-          /*
-          // Get the token balance of the treasury
-          const balance = await tokenContract.balanceOf(contracts.treasury.target);
+          // Get necessary data from blockchain
+          const treasuryAddress = await contracts.treasury.getAddress();
+          const tokenBalance = await tokenContract.balanceOf(treasuryAddress);
           
-          // Get the token decimals if not known
-          const decimals = t2Asset.decimals || await tokenContract.decimals();
+          // Use the appropriate valuation function based on asset type
+          let result: { value: number, balance: number };
           
-          // Convert to a readable format
-          const formattedBalance = parseFloat(ethers.formatUnits(balance, decimals));
+          switch (t2Asset.assetType) {
+            case AssetType.STAKED_ETH:
+              result = await valueStakedEthAsset(
+                tokenContract,
+                tokenBalance,
+                ethPrice,
+                t2Asset.decimals
+              );
+              break;
+              
+            case AssetType.LP_TOKEN:
+              result = await valueLpTokenAsset(
+                tokenContract,
+                tokenBalance,
+                ethPrice, 
+                t2Asset.decimals
+              );
+              break;
+              
+            case AssetType.GENERIC_ERC20:
+            default:
+              result = await valueGenericErc20Asset(
+                tokenContract,
+                tokenBalance,
+                t2Asset.decimals
+              );
+              break;
+          }
           
-          // For non-stablecoin assets, we would need a price oracle to get the USD value
-          // For this example, we're assuming a fixed price
-          const pricePerToken = t2Asset.symbol === 'stETH' ? 3500 : 1; // Example price
-          const value = formattedBalance * pricePerToken;
-          */
-          
-          // Using hardcoded values for now
-          const value = t2Asset.estimated_value;
-          const balance = value; // Assuming 1:1 for simplicity
+          const { value, balance: formattedBalance } = result;
           
           t2Assets.push({
             symbol: t2Asset.symbol,
             name: t2Asset.name,
             value,
-            balance,
+            balance: formattedBalance,
             address: t2Asset.address
           });
           
           t2Value += value;
+          
         } catch (error) {
           console.error(`Error fetching T2 asset ${t2Asset.symbol}:`, error);
+          
+          // For testing and development, add placeholder data when errors occur
+          if (process.env.NODE_ENV === 'development') {
+            const placeholderValue = t2Asset.symbol === 'stETH' ? 125000 : 75000;
+            t2Assets.push({
+              symbol: t2Asset.symbol,
+              name: t2Asset.name,
+              value: placeholderValue,
+              balance: placeholderValue / 3500, // Assuming ETH price of 3500
+              address: t2Asset.address
+            });
+            t2Value += placeholderValue;
+          }
         }
       }
       
