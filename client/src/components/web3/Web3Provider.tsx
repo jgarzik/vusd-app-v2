@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import { useEffect, useState } from 'react';
 import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

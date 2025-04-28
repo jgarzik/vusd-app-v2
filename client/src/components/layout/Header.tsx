@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import ConnectWallet from "@/components/web3/ConnectWallet";

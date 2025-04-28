@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import type { Config } from "tailwindcss";
 
 export default {

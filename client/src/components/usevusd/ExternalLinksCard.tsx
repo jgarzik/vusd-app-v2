@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "wouter";
 import { ExternalLink } from "lucide-react";

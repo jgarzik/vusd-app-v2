@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 

@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 // Types of assets in the treasury
 export enum AssetType {
   STAKED_ETH,

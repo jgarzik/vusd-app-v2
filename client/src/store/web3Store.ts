@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import { create } from 'zustand';
 import { ethers } from 'ethers';
 

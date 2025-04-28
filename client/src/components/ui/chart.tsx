@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -90,11 +94,13 @@ ${colorConfig
       itemConfig.color
     return color ? `  --color-${key}: ${color};` : null
   })
-  .join("\n")}
+  .join("
+")}
 }
 `
           )
-          .join("\n"),
+          .join("
+"),
       }}
     />
   )

@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import { cn } from "@/lib/utils"
 
 function Skeleton({

@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 export const ERC20_ABI = [
   // Read-only functions
   "function name() view returns (string)",

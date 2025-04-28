@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 export const REDEEMER_ABI = [
   // Basic information
   "function NAME() view returns (string)",

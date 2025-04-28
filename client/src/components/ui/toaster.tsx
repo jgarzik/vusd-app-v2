@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import { useToast } from "@/hooks/use-toast"
 import {
   Toast,

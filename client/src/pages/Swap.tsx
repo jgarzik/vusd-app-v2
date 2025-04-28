@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import SwapInterface from "@/components/swap/SwapInterface";
 import TreasuryCard from "@/components/analytics/TreasuryCard";
 import ExternalLinksCard from "@/components/usevusd/ExternalLinksCard";

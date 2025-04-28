@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import { users, type User, type InsertUser } from "@shared/schema";
 
 // modify the interface with any CRUD methods

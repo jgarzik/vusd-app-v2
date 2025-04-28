@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import * as AspectRatioPrimitive from "@radix-ui/react-aspect-ratio"
 
 const AspectRatio = AspectRatioPrimitive.Root

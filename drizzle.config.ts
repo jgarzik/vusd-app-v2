@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import { defineConfig } from "drizzle-kit";
 
 if (!process.env.DATABASE_URL) {

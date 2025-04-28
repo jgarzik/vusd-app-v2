@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 // Contract addresses on Ethereum Mainnet
 export const VUSD_ADDRESS = '0x677ddbd918637E5F2c79e164D402454dE7dA8619'; // VUSD token address
 export const MINTER_ADDRESS = '0xFd22Bcf90d63748288913336Cd38BBC0e681e298'; // Minter contract address

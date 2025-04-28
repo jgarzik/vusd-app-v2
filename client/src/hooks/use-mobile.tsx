@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768

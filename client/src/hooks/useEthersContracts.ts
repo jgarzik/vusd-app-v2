@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import { useMemo } from 'react';
 import { Contract, ethers } from 'ethers';
 import { useWeb3 } from './useWeb3';

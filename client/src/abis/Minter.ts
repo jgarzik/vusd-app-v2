@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 export const MINTER_ABI = [
   // Basic ERC20 functions
   "function name() view returns (string)",

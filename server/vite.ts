@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";

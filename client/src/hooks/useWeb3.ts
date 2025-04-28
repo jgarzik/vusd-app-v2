@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import { useMemo } from 'react';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 

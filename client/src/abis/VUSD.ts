@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 export const VUSD_ABI = [
   // ERC20 Standard
   "function name() view returns (string)",

@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import { useState, useEffect } from "react";
 import { ArrowDown } from "lucide-react";
 import TokenSelector from "./TokenSelector";

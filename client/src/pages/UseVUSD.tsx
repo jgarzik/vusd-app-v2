@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 import ExternalLinksCard from "@/components/usevusd/ExternalLinksCard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { externalLinks } from "@/constants/externalLinks";

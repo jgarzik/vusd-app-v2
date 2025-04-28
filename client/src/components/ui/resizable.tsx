@@ -1,3 +1,7 @@
+/**
+ * Copyright 2025 Hemi Labs. All rights reserved.
+ */
+
 "use client"
 
 import { GripVertical } from "lucide-react"
