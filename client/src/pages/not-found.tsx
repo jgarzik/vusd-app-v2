@@ -2,6 +2,19 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * not-found.tsx - 404 error page
+ * 
+ * This page is displayed when a user navigates to a route that doesn't exist.
+ * Key features:
+ * - Clear 404 error message with visual indicator
+ * - Consistent styling with the rest of the application
+ * - Navigation option to return to the main application
+ * - Responsive design for all device sizes
+ * 
+ * The page is used by the wouter router when no matching route is found.
+ */
+
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 

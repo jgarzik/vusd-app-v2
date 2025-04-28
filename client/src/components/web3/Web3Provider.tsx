@@ -2,6 +2,21 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
+/**
+ * Web3Provider.tsx - Blockchain connectivity provider
+ * 
+ * This component sets up the blockchain connectivity infrastructure for the entire application.
+ * Key responsibilities:
+ * - Configuring WagmiProvider with Ethereum mainnet
+ * - Setting up WalletConnect and injected providers
+ * - Managing Web3Modal integration for wallet connection UI
+ * - Initializing QueryClient for data fetching
+ * - Providing authentication context to child components
+ * 
+ * The provider automatically checks for environment variables to configure WalletConnect
+ * and supports both traditional injected providers (MetaMask) and WalletConnect v2.
+ */
+
 import { useEffect, useState } from 'react';
 import { createWeb3Modal } from '@web3modal/wagmi/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
