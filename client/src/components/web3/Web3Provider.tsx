@@ -54,16 +54,23 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
         const data = await response.json();
         
         const projectId = data.walletConnectProjectId;
+        const infuraId = data.infuraId;
         
         if (!projectId) {
           console.warn('WalletConnect Project ID is missing. Wallet connection may not work correctly.');
         }
         
-        // Create wagmi config
+        if (!infuraId) {
+          console.warn('Infura ID is missing. Using default RPC provider, which may have rate limits.');
+        }
+        
+        // Create wagmi config with Infura provider
         const config = createConfig({
           chains: [mainnet],
           transports: {
-            [mainnet.id]: http(),
+            [mainnet.id]: infuraId 
+              ? http(`https://mainnet.infura.io/v3/${infuraId}`) 
+              : http(), // Fallback to default if no Infura ID
           },
           connectors: [
             injected({ target: 'metaMask' }),

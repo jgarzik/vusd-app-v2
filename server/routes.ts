@@ -15,7 +15,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Expose environment variables needed by the frontend
   app.get('/api/config', (req, res) => {
     res.json({
-      walletConnectProjectId: process.env.WALLETCONNECT_PROJECT_ID || ''
+      walletConnectProjectId: process.env.WALLETCONNECT_PROJECT_ID || '',
+      infuraId: process.env.INFURA_ID || ''
     });
   });
 
