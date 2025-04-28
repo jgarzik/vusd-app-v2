@@ -2,9 +2,8 @@
  * Copyright 2025 Hemi Labs. All rights reserved.
  */
 
-import ExternalLinksCard from "@/components/usevusd/ExternalLinksCard";
+import OpportunitiesRow from "@/components/usevusd/OpportunitiesRow";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { externalLinks } from "@/constants/externalLinks";
 
 const UseVUSD = () => {
   return (
@@ -74,7 +73,10 @@ const UseVUSD = () => {
         </Card>
       </div>
       
-      <ExternalLinksCard />
+      {/* VUSD Opportunities */}
+      <div className="mb-8">
+        <OpportunitiesRow />
+      </div>
       
       <Card className="mt-6">
         <CardHeader>

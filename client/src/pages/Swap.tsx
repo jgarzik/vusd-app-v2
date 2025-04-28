@@ -4,20 +4,16 @@
 
 import SwapInterface from "@/components/swap/SwapInterface";
 import TreasuryCard from "@/components/analytics/TreasuryCard";
-import ExternalLinksCard from "@/components/usevusd/ExternalLinksCard";
+import OpportunitiesRow from "@/components/usevusd/OpportunitiesRow";
 
 const Swap = () => {
   return (
     <div className="container mx-auto px-4">
-      <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto">
+      {/* Top section with Swap and Treasury */}
+      <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto mb-8">
         {/* Left column - Swap Interface */}
         <div className="w-full lg:w-8/12">
           <SwapInterface />
-          
-          {/* External Links Card - Only visible on larger screens */}
-          <div className="mt-6 hidden md:block">
-            <ExternalLinksCard previewMode={true} />
-          </div>
         </div>
         
         {/* Right column - Treasury Analytics */}
@@ -26,11 +22,11 @@ const Swap = () => {
             <TreasuryCard previewMode={true} />
           </div>
         </div>
-        
-        {/* External Links Card - Only visible on mobile */}
-        <div className="mt-6 md:hidden w-full">
-          <ExternalLinksCard previewMode={true} />
-        </div>
+      </div>
+      
+      {/* Bottom section with opportunity cards */}
+      <div className="max-w-7xl mx-auto mt-6">
+        <OpportunitiesRow showViewAll={true} />
       </div>
     </div>
   );
