@@ -74,18 +74,39 @@ const Analytics = () => {
           <CardDescription>Distribution of assets in the VUSD treasury</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-sm font-medium text-gray-300">T1 (Whitelisted Stablecoins)</div>
-              <div className="text-sm font-medium">{formatCurrency(treasuryData.t1Value)}</div>
-            </div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-sm font-medium text-gray-300">T2 (Other Assets)</div>
-              <div className="text-sm font-medium">{formatCurrency(treasuryData.t2Value)}</div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium text-gray-300">Excess Value</div>
-              <div className="text-sm font-medium text-green-500">+{formatCurrency(treasuryData.excessValue)}</div>
+          <div className="mb-6">
+            <div className="border border-gray-800 rounded-lg overflow-hidden">
+              <table className="w-full">
+                <tbody>
+                  <tr className="border-b border-gray-800">
+                    <td className="p-3 bg-background-light">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                        <span className="text-sm font-medium">T1 (Whitelisted Stablecoins)</span>
+                      </div>
+                    </td>
+                    <td className="p-3 text-right font-medium">{formatCurrency(treasuryData.t1Value)}</td>
+                  </tr>
+                  <tr className="border-b border-gray-800">
+                    <td className="p-3 bg-background-light">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                        <span className="text-sm font-medium">T2 (Other Assets)</span>
+                      </div>
+                    </td>
+                    <td className="p-3 text-right font-medium">{formatCurrency(treasuryData.t2Value)}</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3 bg-background-light">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+                        <span className="text-sm font-medium">Excess Value</span>
+                      </div>
+                    </td>
+                    <td className="p-3 text-right font-medium text-green-500">+{formatCurrency(treasuryData.excessValue)}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
           
@@ -171,12 +192,7 @@ const Analytics = () => {
                   <ArrowRight className="h-6 w-6 text-emerald-500 drop-shadow-[0_0_3px_rgba(5,150,105,0.5)]" />
                 </div>
                 
-                {/* High-impact text label above the line */}
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                  <div className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600 px-3 py-1.5 rounded-lg border border-green-500/20 shadow-[0_0_15px_rgba(5,150,105,0.2)] bg-background-card/80 backdrop-blur-sm">
-                    T2 BREAKDOWN
-                  </div>
-                </div>
+                {/* No text label anymore */}
               </div>
               
               {/* Mobile only connector (vertical) */}
@@ -284,37 +300,6 @@ const Analytics = () => {
           </CardContent>
         </Card>
       </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>VUSD Activity</CardTitle>
-          <CardDescription>Historical swapping volume data</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-10 space-y-6 text-center">
-            <div className="rounded-full bg-gray-800/50 p-6 w-20 h-20 flex items-center justify-center">
-              <div className="w-12 h-12 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin"></div>
-            </div>
-            <div className="max-w-md">
-              <h3 className="text-lg font-medium mb-2">Activity data will be available soon</h3>
-              <p className="text-gray-400 text-sm">
-                Real-time transaction activity data for the VUSD protocol is being indexed from the blockchain. 
-                This section will display actual swapping volume once the indexing service is connected.
-              </p>
-            </div>
-            <div className="flex gap-4 mt-4">
-              <div className="p-4 border border-gray-800 rounded-lg flex items-center gap-3 bg-background-card">
-                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                <div className="text-sm">Swap to VUSD</div>
-              </div>
-              <div className="p-4 border border-gray-800 rounded-lg flex items-center gap-3 bg-background-card">
-                <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                <div className="text-sm">Swap from VUSD</div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
