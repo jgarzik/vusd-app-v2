@@ -4,16 +4,29 @@ import ExternalLinksCard from "@/components/usevusd/ExternalLinksCard";
 
 const Swap = () => {
   return (
-    <div>
-      {/* Swap Interface */}
-      <div className="max-w-lg mx-auto">
-        <SwapInterface />
-      </div>
-      
-      {/* Additional Cards */}
-      <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mt-8">
-        <TreasuryCard previewMode={true} />
-        <ExternalLinksCard previewMode={true} />
+    <div className="container mx-auto px-4">
+      <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto">
+        {/* Left column - Swap Interface */}
+        <div className="w-full lg:w-7/12">
+          <SwapInterface />
+          
+          {/* External Links Card - Only visible on larger screens */}
+          <div className="mt-6 hidden md:block">
+            <ExternalLinksCard previewMode={true} />
+          </div>
+        </div>
+        
+        {/* Right column - Treasury Analytics */}
+        <div className="w-full lg:w-5/12 lg:mt-0">
+          <div className="sticky top-24">
+            <TreasuryCard previewMode={true} />
+          </div>
+        </div>
+        
+        {/* External Links Card - Only visible on mobile */}
+        <div className="mt-6 md:hidden w-full">
+          <ExternalLinksCard previewMode={true} />
+        </div>
       </div>
     </div>
   );
