@@ -173,8 +173,17 @@ export const useSwap = () => {
    * @throws Displays a toast notification to the user on errors
    */
   const estimateSwap = useCallback(async (amount: number, fromToken: string, toToken: string) => {
-    if (!amount || amount <= 0 || !contracts) {
+    // Always reset loading state when entering the function
+    setLoading(false);
+    
+    if (!amount || amount <= 0) {
       setOutputAmount(0);
+      return;
+    }
+    
+    if (!contracts) {
+      setOutputAmount(0);
+      console.warn('Contracts not available for estimation');
       return;
     }
     
@@ -212,11 +221,7 @@ export const useSwap = () => {
       } else {
         // Either contract is not available
         setOutputAmount(0);
-        toast({
-          title: 'Contract Error',
-          description: 'Required contract is not available',
-          variant: 'destructive',
-        });
+        console.warn('Required contract is not available', { direction, hasMinter: !!contracts.minter, hasRedeemer: !!contracts.redeemer });
       }
     } catch (error) {
       console.error('Error estimating swap:', error);
@@ -383,6 +388,9 @@ export const useSwap = () => {
    * - For 'fromVUSD': Checks if the VUSD allowance to Redeemer is sufficient
    */
   const checkApprovalNeeded = useCallback(async (): Promise<boolean> => {
+    // Reset checking state at the start to prevent getting stuck
+    setCheckingApproval(false);
+    
     if (!isConnected || !address || !inputAmount || inputAmount <= 0) {
       return false;
     }
