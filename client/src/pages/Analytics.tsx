@@ -75,6 +75,27 @@ const Analytics = () => {
     <div className="max-w-6xl mx-auto">
       <h1 className="text-3xl font-heading font-bold mb-6">VUSD Analytics</h1>
       
+      {/* Markets Section */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-purple-500 to-indigo-500 bg-clip-text text-transparent">Markets</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="col-span-1 md:col-span-1 lg:col-span-1">
+            <MarketDataCard />
+          </div>
+          {/* Additional market cards will be added here in the future */}
+          <div className="col-span-1 md:col-span-1 lg:col-span-3 flex items-center justify-center bg-background-light/30 rounded-lg border border-border/50 p-6">
+            <div className="text-center">
+              <h3 className="text-lg font-medium mb-2 opacity-70">More Market Data Coming Soon</h3>
+              <p className="text-sm text-muted-foreground max-w-md">
+                Additional market data from Uniswap, Curve, and Sushiswap will be available in future updates.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Treasury Section */}
+      <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Treasury</h2>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <Card>
           <CardHeader className="pb-2">
