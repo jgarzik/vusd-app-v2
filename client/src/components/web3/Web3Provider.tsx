@@ -61,28 +61,35 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
           console.warn('WalletConnect Project ID is missing. Wallet connection may not work correctly.');
         }
         
-        // Create wagmi config
+        // Create wagmi config with optimized settings
         const config = createConfig({
           chains: [mainnet],
           transports: {
-            [mainnet.id]: http(),
+            [mainnet.id]: http(), // Use default HTTP transport
           },
           connectors: [
             injected({ target: 'metaMask' }),
-            walletConnect({ projectId, metadata: getMetadata(), relayUrl: 'wss://relay.walletconnect.org' })
+            walletConnect({ 
+              projectId, 
+              metadata: getMetadata(), 
+              relayUrl: 'wss://relay.walletconnect.org',
+              showQrModal: true 
+            })
           ],
         });
         
-        // Initialize Web3Modal
+        // Initialize Web3Modal with optimized performance options
         createWeb3Modal({
           wagmiConfig: config,
           projectId,
-          enableAnalytics: false,
+          enableAnalytics: false, // Disable analytics to reduce background activity
           themeMode: 'dark',
           themeVariables: {
             '--w3m-accent': 'hsl(var(--primary))',
             '--w3m-border-radius-master': '0.5rem',
           },
+          defaultChain: mainnet, // Pre-select mainnet to reduce chain switching overhead
+          featuredWalletIds: [] // Disable featured wallets list to reduce initial rendering cost
         });
         
         setWagmiConfig(config);
