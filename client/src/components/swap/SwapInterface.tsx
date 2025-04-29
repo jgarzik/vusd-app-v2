@@ -90,16 +90,11 @@ const SwapInterface = () => {
   useEffect(() => {
     // Create a debounced function to avoid too many calls
     const debouncedEstimate = setTimeout(() => {
-      if (inputAmount && inputAmount !== "" && inputToken && outputToken) {
-        const inputAmountNumber = parseFloat(inputAmount as string);
-        if (!isNaN(inputAmountNumber) && inputAmountNumber > 0) {
-          console.log(`Estimating swap: ${inputAmountNumber} ${inputToken} to ${outputToken}`);
-          estimateSwap(inputAmountNumber, inputToken, outputToken);
-        } else {
-          setOutputAmount("");
-        }
+      if (inputAmount && inputAmount > 0 && inputToken && outputToken) {
+        console.log(`Estimating swap: ${inputAmount} ${inputToken} to ${outputToken}`);
+        estimateSwap(inputAmount, inputToken, outputToken);
       } else {
-        setOutputAmount("");
+        setOutputAmount(0);
       }
     }, 300); // 300ms debounce
     
@@ -109,40 +104,13 @@ const SwapInterface = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    
-    // Allow empty input
-    if (value === "") {
-      setInputAmount("");
-      return;
-    }
-    
-    // Get the token's decimal places
-    const tokenDecimals = getTokenDecimals(inputToken);
-    
-    // Validate input: only digits and one decimal point
-    // The regex allows a number with up to the token's max decimal places
-    const decimalRegex = new RegExp(`^\\d+(\\.\\d{0,${tokenDecimals}})?$`);
-    
-    if (decimalRegex.test(value)) {
-      setInputAmount(value);
-    }
+    setInputAmount(parseInputAmount(value));
   };
 
   const handleOutputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    
-    // Output field is read-only, but keeping validation for consistency
-    if (value === "") {
-      setOutputAmount("");
-      return;
-    }
-    
-    const tokenDecimals = getTokenDecimals(outputToken);
-    const decimalRegex = new RegExp(`^\\d+(\\.\\d{0,${tokenDecimals}})?$`);
-    
-    if (decimalRegex.test(value)) {
-      setOutputAmount(value);
-    }
+    setOutputAmount(parseInputAmount(value));
+    // In a real implementation, we would estimate the input based on the output
   };
 
   /**
@@ -392,8 +360,7 @@ const SwapInterface = () => {
             
             <div className="flex items-center">
               <Input
-                type="text"
-                inputMode="decimal"
+                type="number"
                 placeholder="0.0"
                 className="bg-transparent text-xl font-medium w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 value={inputAmount || ""}
@@ -438,8 +405,7 @@ const SwapInterface = () => {
             
             <div className="flex items-center">
               <Input
-                type="text"
-                inputMode="decimal"
+                type="number"
                 placeholder="0.0"
                 className="bg-transparent text-xl font-medium w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 value={outputAmount || ""}
