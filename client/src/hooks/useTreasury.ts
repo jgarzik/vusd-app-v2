@@ -66,6 +66,11 @@ export const useTreasury = () => {
   const { contracts } = useEthersContracts();
   
   const [loading, setLoading] = useState(true);
+  // Track when treasury data was last updated (for caching)
+  const [dataLastUpdated, setDataLastUpdated] = useState<number>(0);
+  // Cache window in milliseconds (3 minutes - Treasury data changes less frequently)
+  const TREASURY_CACHE_DURATION = 3 * 60 * 1000;
+  
   const [treasuryData, setTreasuryData] = useState<TreasuryData>({
     totalValue: 4721834,
     t1Value: 4521834,
@@ -304,8 +309,16 @@ export const useTreasury = () => {
    * 
    * @throws Displays toast notification on error and logs details to console
    */
-  const fetchTreasuryData = useCallback(async () => {
+  const fetchTreasuryData = useCallback(async (forceRefresh = false) => {
     if (!contracts.treasury || !contracts.vusd) {
+      return;
+    }
+    
+    // Check if cached data is still fresh (within 3 minutes)
+    const now = Date.now();
+    if (!forceRefresh && now - dataLastUpdated < TREASURY_CACHE_DURATION) {
+      // Use cached data if it's fresh enough and not forcing refresh
+      setLoading(false);
       return;
     }
     
@@ -477,8 +490,10 @@ export const useTreasury = () => {
       });
     } finally {
       setLoading(false);
+      // Update the last updated timestamp for the cache
+      setDataLastUpdated(Date.now());
     }
-  }, [contracts.treasury, contracts.vusd, toast]);
+  }, [contracts.treasury, contracts.vusd, toast, dataLastUpdated, TREASURY_CACHE_DURATION]);
   
   /**
    * Initialize treasury data when the component mounts.

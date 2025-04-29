@@ -49,7 +49,20 @@ interface TreasuryCardProps {
  * All monetary values are formatted consistently using the formatCurrency utility.
  */
 const TreasuryCard = ({ previewMode = false }: TreasuryCardProps) => {
-  const { treasuryData, loading } = useTreasury();
+  const { treasuryData, loading, refreshTreasuryData } = useTreasury();
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  
+  // Function to handle manual refresh with animation
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      // Force refresh by passing true to bypass the cache
+      await refreshTreasuryData(true);
+    } finally {
+      // Add slight delay for better UX before stopping the animation
+      setTimeout(() => setIsRefreshing(false), 500);
+    }
+  };
   
   /**
    * Returns the appropriate CSS class for token icons based on token symbol.
