@@ -454,13 +454,12 @@ export const useSwap = () => {
         const inputTokenAddress = getTokenAddress(inputToken);
         const inputTokenContract = connectedContracts.getERC20Contract(inputTokenAddress);
         
-        console.log('Approving input token for Minter contract');
+        // Execute the approval transaction
         const tx = await inputTokenContract.approve(connectedContracts.minter.target, ethers.MaxUint256);
         await tx.wait();
         return tx;
       } else {
         // Approve VUSD -> Redeemer
-        console.log('Approving VUSD for Redeemer contract');
         const tx = await connectedContracts.vusd.approve(connectedContracts.redeemer.target, ethers.MaxUint256);
         await tx.wait();
         return tx;

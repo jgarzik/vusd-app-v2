@@ -91,7 +91,6 @@ const SwapInterface = () => {
     // Create a debounced function to avoid too many calls
     const debouncedEstimate = setTimeout(() => {
       if (inputAmount && inputAmount > 0 && inputToken && outputToken) {
-        console.log(`Estimating swap: ${inputAmount} ${inputToken} to ${outputToken}`);
         estimateSwap(inputAmount, inputToken, outputToken);
       } else {
         setOutputAmount(0);
