@@ -28,12 +28,14 @@ import { injected, walletConnect } from 'wagmi/connectors';
 const queryClient = new QueryClient();
 
 // Set up the wagmi config with Ethereum mainnet
-// Use the current deployed URL instead of a hardcoded one to prevent WalletConnect warnings
-const metadata = {
-  name: 'VUSD Application',
-  description: 'Swap to or from the VUSD stablecoin',
-  url: 'https://vusd-hub.replit.app', // Current Replit deployment URL
-  icons: ['https://avatars.githubusercontent.com/u/37784886']
+// Use dynamic URL detection to prevent WalletConnect warnings in any environment
+const getMetadata = () => {
+  return {
+    name: 'VUSD Application',
+    description: 'Swap to or from the VUSD stablecoin',
+    url: window.location.origin, // Dynamically get the current URL
+    icons: ['https://avatars.githubusercontent.com/u/37784886']
+  };
 };
 
 interface Web3ProviderProps {
@@ -67,7 +69,7 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
           },
           connectors: [
             injected({ target: 'metaMask' }),
-            walletConnect({ projectId, metadata, relayUrl: 'wss://relay.walletconnect.org' })
+            walletConnect({ projectId, metadata: getMetadata(), relayUrl: 'wss://relay.walletconnect.org' })
           ],
         });
         

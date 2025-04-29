@@ -88,14 +88,16 @@ const SwapInterface = () => {
    */
   // Use a separate useEffect for estimating swap amounts with debounce to prevent rapid re-renders
   useEffect(() => {
-    // Create a debounced function to avoid too many calls
+    // Skip estimate if any required values are missing
+    if (!inputAmount || inputAmount <= 0 || !inputToken || !outputToken) {
+      setOutputAmount(0);
+      return;
+    }
+    
+    // Create a debounced function with longer delay (500ms) to reduce blockchain calls
     const debouncedEstimate = setTimeout(() => {
-      if (inputAmount && inputAmount > 0 && inputToken && outputToken) {
-        estimateSwap(inputAmount, inputToken, outputToken);
-      } else {
-        setOutputAmount(0);
-      }
-    }, 300); // 300ms debounce
+      estimateSwap(inputAmount, inputToken, outputToken);
+    }, 500); // 500ms debounce
     
     // Clear timeout on cleanup
     return () => clearTimeout(debouncedEstimate);
