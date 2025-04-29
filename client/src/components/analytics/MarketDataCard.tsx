@@ -109,11 +109,6 @@ export function MarketDataCard() {
                 <div className="font-medium">${formatNumber(data.volume_24h, 0)}</div>
               </div>
             </div>
-            
-            <div>
-              <div className="text-sm text-muted-foreground">Contract Address</div>
-              <div className="font-medium text-sm truncate">{data.contract_address}</div>
-            </div>
           </div>
         ) : (
           <div className="text-muted-foreground py-4">
