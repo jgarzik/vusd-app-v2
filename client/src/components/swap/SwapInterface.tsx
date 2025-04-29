@@ -87,21 +87,35 @@ const SwapInterface = () => {
    * either token selection changes, keeping the output value in sync.
    */
   // Use a separate useEffect for estimating swap amounts with debounce to prevent rapid re-renders
+  // and to avoid circular dependencies
   useEffect(() => {
     // Skip estimate if any required values are missing
     if (!inputAmount || inputAmount <= 0 || !inputToken || !outputToken) {
-      setOutputAmount(0);
+      if (outputAmount !== 0) {
+        setOutputAmount(0);
+      }
       return;
     }
     
-    // Create a debounced function with longer delay (500ms) to reduce blockchain calls
+    // Store current values to ensure consistency in the async context
+    const currentInputAmount = inputAmount;
+    const currentInputToken = inputToken;
+    const currentOutputToken = outputToken;
+    
+    // Use longer debounce (700ms) to significantly reduce blockchain calls
+    // This is a critical optimization for reducing RPC usage
     const debouncedEstimate = setTimeout(() => {
-      estimateSwap(inputAmount, inputToken, outputToken);
-    }, 500); // 500ms debounce
+      // Only run estimation if values haven't changed during the debounce period
+      if (currentInputAmount === inputAmount && 
+          currentInputToken === inputToken && 
+          currentOutputToken === outputToken) {
+        estimateSwap(currentInputAmount, currentInputToken, currentOutputToken);
+      }
+    }, 700); // 700ms debounce
     
     // Clear timeout on cleanup
     return () => clearTimeout(debouncedEstimate);
-  }, [inputAmount, inputToken, outputToken, estimateSwap, setOutputAmount]);
+  }, [inputAmount, inputToken, outputToken]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

@@ -22,7 +22,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "wouter";
 import { useTreasury } from "@/hooks/useTreasury";
 import { formatCurrency } from "@/lib/utils";
-import { Shield, Coins, ArrowUpCircle } from "lucide-react";
+import { Shield, Coins, ArrowUpCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface TreasuryCardProps {
   previewMode?: boolean;
@@ -86,11 +87,25 @@ const TreasuryCard = ({ previewMode = false }: TreasuryCardProps) => {
     <Card className="bg-card rounded-xl overflow-hidden h-full">
       <CardHeader className="px-5 py-4 border-b border-gray-800 flex justify-between items-center">
         <CardTitle className="font-heading font-semibold">VUSD Treasury</CardTitle>
-        {previewMode && (
-          <Link href="/analytics">
-            <a className="text-primary hover:text-primary-light text-sm font-medium">View More</a>
-          </Link>
-        )}
+        <div className="flex items-center space-x-3">
+          {!previewMode && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleRefresh}
+              disabled={loading || isRefreshing}
+              className="p-1 h-8 w-8"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
+              <span className="sr-only">Refresh treasury data</span>
+            </Button>
+          )}
+          {previewMode && (
+            <Link href="/analytics">
+              <a className="text-primary hover:text-primary-light text-sm font-medium">View More</a>
+            </Link>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="p-5">
         <div className="flex flex-col space-y-6">

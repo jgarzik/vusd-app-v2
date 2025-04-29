@@ -511,9 +511,9 @@ export const useTreasury = () => {
     setLoading(false);
     
     // Fetch real data only once when the component mounts
+    // Without auto-refresh - this complies with the requirement that analytics page data
+    // should only refresh when manually triggered by the user
     fetchTreasuryData();
-    
-    // No interval refresh - users can manually refresh by reloading the page
   }, [fetchTreasuryData]);
   
   return {
