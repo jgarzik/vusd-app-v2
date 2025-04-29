@@ -2,9 +2,7 @@
  * Test script to query VUSD (Vesper vDollar) price from CoinGecko API
  */
 
-// Simple fetch implementation for Node.js
-const fetch = require('node-fetch');
-
+// Using native fetch for Node.js (available since Node 18+)
 // VUSD token identifier on CoinGecko
 const VUSD_ID = 'vesper-vdollar';
 
