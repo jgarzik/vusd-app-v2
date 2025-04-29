@@ -17,7 +17,7 @@
  * The interface abstracts the underlying mint/redeem contract operations to present a unified "swap" experience.
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ArrowDown } from "lucide-react";
 import TokenSelector from "./TokenSelector";
 import TransactionStatus from "./TransactionStatus";
@@ -322,25 +322,42 @@ const SwapInterface = () => {
     setTxHash("");
   };
 
-  // Get appropriate token colors
-  const getTokenIconClass = (symbol: string) => {
-    switch(symbol) {
-      case 'USDC': return 'token-icon-usdc';
-      case 'USDT': return 'token-icon-usdt';
-      case 'DAI': return 'token-icon-dai';
-      case 'VUSD': return 'token-icon-vusd';
-      default: return 'bg-gray-500';
-    }
-  };
+  // Get appropriate token colors - memoized to prevent repeated switch evaluations
+  const getTokenIconClass = useMemo(() => {
+    return (symbol: string) => {
+      switch(symbol) {
+        case 'USDC': return 'token-icon-usdc';
+        case 'USDT': return 'token-icon-usdt';
+        case 'DAI': return 'token-icon-dai';
+        case 'VUSD': return 'token-icon-vusd';
+        default: return 'bg-gray-500';
+      }
+    };
+  }, []);
 
-  // Get token display data
-  const getTokenData = (symbol: string) => SUPPORTED_TOKENS.find(t => t.symbol === symbol) || SUPPORTED_TOKENS[0];
+  // Get token display data - memoized to reduce lookups
+  const getTokenData = useMemo(() => {
+    return (symbol: string) => SUPPORTED_TOKENS.find(t => t.symbol === symbol) || SUPPORTED_TOKENS[0];
+  }, []);
   
-  // Helper function to get token decimals
-  const getTokenDecimals = (symbol: string): number => {
-    const token = SUPPORTED_TOKENS.find((t) => t.symbol === symbol);
-    return token?.decimals || 18; // Default to 18 if not found
-  };
+  // Helper function to get token decimals - memoized to prevent redundant lookups
+  const getTokenDecimals = useMemo(() => {
+    return (symbol: string): number => {
+      const token = SUPPORTED_TOKENS.find((t) => t.symbol === symbol);
+      return token?.decimals || 18; // Default to 18 if not found
+    };
+  }, []);
+  
+  // Memoize exchange rate calculation to prevent recalculation on every render
+  const exchangeRateDisplay = useMemo(() => {
+    return calculateExchangeRate(
+      inputAmount || 0,
+      outputAmount || 0,
+      inputToken,
+      outputToken,
+      Math.max(getTokenDecimals(inputToken), getTokenDecimals(outputToken))
+    );
+  }, [inputAmount, outputAmount, inputToken, outputToken, getTokenDecimals]);
 
   return (
     <>
@@ -441,13 +458,7 @@ const SwapInterface = () => {
             <div className="flex justify-between items-center mb-1">
               <span className="text-gray-400">Exchange Rate</span>
               <span className="text-gray-300">
-                {calculateExchangeRate(
-                  inputAmount || 0,
-                  outputAmount || 0,
-                  inputToken,
-                  outputToken,
-                  Math.max(getTokenDecimals(inputToken), getTokenDecimals(outputToken))
-                )}
+                {exchangeRateDisplay}
               </span>
             </div>
             <div className="flex justify-between items-center">
