@@ -37,8 +37,8 @@ type SwapDirection = 'toVUSD' | 'fromVUSD';
  * @property {Object} balances - Current token balances for the connected wallet
  * @property {string} inputToken - Selected input token symbol
  * @property {string} outputToken - Selected output token symbol
- * @property {number} inputAmount - Amount to swap in human-readable format
- * @property {number} outputAmount - Expected output amount in human-readable format
+ * @property {string} inputAmount - Amount to swap in human-readable format (as string)
+ * @property {string} outputAmount - Expected output amount in human-readable format (as string)
  * @property {number} fee - Current fee percentage for the selected swap
  * @property {boolean} loading - Whether a swap operation is in progress
  * @property {Function} setInputToken - Function to change the input token
@@ -64,8 +64,8 @@ export const useSwap = () => {
   
   const [inputToken, setInputToken] = useState<string>('USDC');
   const [outputToken, setOutputToken] = useState<string>('VUSD');
-  const [inputAmount, setInputAmount] = useState<number>(0);
-  const [outputAmount, setOutputAmount] = useState<number>(0);
+  const [inputAmount, setInputAmount] = useState<string>('');
+  const [outputAmount, setOutputAmount] = useState<string>('');
   const [fee, setFee] = useState<number>(0.003); // Default 0.3% fee
   const [loading, setLoading] = useState<boolean>(false);
   const [needsApproval, setNeedsApproval] = useState<boolean>(false);
@@ -174,7 +174,7 @@ export const useSwap = () => {
    */
   const estimateSwap = useCallback(async (amount: number, fromToken: string, toToken: string) => {
     if (!amount || amount <= 0) {
-      setOutputAmount(0);
+      setOutputAmount('');
       return;
     }
     
@@ -196,7 +196,7 @@ export const useSwap = () => {
         const amountIn = ethers.parseUnits(amount.toString(), fromTokenDecimals);
         
         const mintage = await contracts.minter.calculateMintage(fromTokenAddress, amountIn);
-        setOutputAmount(parseFloat(ethers.formatUnits(mintage, 18)));
+        setOutputAmount(ethers.formatUnits(mintage, 18));
         
         // Get minting fee
         const mintingFee = await contracts.minter.mintingFee();
@@ -210,7 +210,7 @@ export const useSwap = () => {
         const redeemableFunc = contracts.redeemer.getFunction("redeemable(address,uint256)");
         const redeemable = await redeemableFunc(toTokenAddress, amountIn);
         const toTokenDecimals = getTokenDecimals(toToken);
-        setOutputAmount(parseFloat(ethers.formatUnits(redeemable, toTokenDecimals)));
+        setOutputAmount(ethers.formatUnits(redeemable, toTokenDecimals));
         
         // Get redeem fee
         const redeemFee = await contracts.redeemer.redeemFee();
@@ -218,7 +218,7 @@ export const useSwap = () => {
       }
     } catch (error) {
       console.error('Error estimating swap:', error);
-      setOutputAmount(0);
+      setOutputAmount('');
       toast({
         title: 'Estimation Error',
         description: 'Failed to estimate swap amount',
