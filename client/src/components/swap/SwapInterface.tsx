@@ -196,18 +196,17 @@ const SwapInterface = () => {
     // Only strictly necessary dependencies to reduce update frequency
     isConnected,
     isMainnet,
-    // For inputAmount, we're only concerned with zero to non-zero transitions
-    // or when it exceeds balance
-    inputAmount > 0, 
+    // Using a memo pattern to only update when significant changes occur
+    // Boolean flags to minimize dependency changes
+    Boolean(inputAmount > 0), 
     inputToken,
-    balances[inputToken] < inputAmount,
+    Boolean(balances[inputToken] < inputAmount),
     needsApproval,
     loading,
     checkingApproval,
-    isUpdatingButton,
-    // Include button state to check if it's different
-    buttonState.text,
-    buttonState.disabled
+    isUpdatingButton
+    // Removed buttonState from dependencies as it creates a circular dependency
+    // that causes continuous re-renders
   ]);
   
   // Define button actions based on current state
