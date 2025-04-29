@@ -18,7 +18,7 @@
  * - Close button to dismiss after completion
  */
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { formatAmount } from "@/lib/utils";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
@@ -113,6 +113,9 @@ const TransactionStatus = ({
           <DialogTitle className="font-heading font-semibold text-lg">
             Swap Status
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Transaction status and details for your token swap
+          </DialogDescription>
         </DialogHeader>
         
         <div className="p-6 text-center">
