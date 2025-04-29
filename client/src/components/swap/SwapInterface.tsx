@@ -185,7 +185,6 @@ const SwapInterface = () => {
     
     // Only update state if it's different to avoid unnecessary re-renders
     if (buttonState.text !== newText || buttonState.disabled !== newDisabled) {
-      console.log(`Updating button state: ${newText} (disabled: ${newDisabled})`);
       setButtonState({
         text: newText,
         disabled: newDisabled
