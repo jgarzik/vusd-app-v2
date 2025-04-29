@@ -482,7 +482,7 @@ export const useSwap = () => {
     getConnectedContracts
   ]);
 
-  // Run approval check only when specific inputs change, with debounce to prevent infinite loops
+  // Run approval check with significant throttling to prevent excessive blockchain calls
   useEffect(() => {
     // Prevent unnecessary checks
     if (!isConnected || !address || !inputAmount || inputAmount <= 0) {
@@ -491,26 +491,27 @@ export const useSwap = () => {
       return;
     }
 
-    // Flag to track async operation
+    // Flag to track if the effect is still active when async operations complete
     let isActive = true;
     
-    // Track approval check to prevent redundant calls
+    // Significant throttling - check approval less frequently
+    // Using a 30-second delay prevents excessive network calls
     let approvalCheckTimeout: NodeJS.Timeout | null = null;
     
     const runApprovalCheck = async () => {
-      // Don't run if there's already a check in progress
+      // Skip if already checking approval
       if (checkingApproval) return;
       
       try {
-        console.log('Starting approval check...');
-        setCheckingApproval(true);
-        
-        // Snapshot current values to avoid closure issues
+        // Capture current values to ensure consistency in async context
         const currentInputAmount = inputAmount;
         const currentInputToken = inputToken;
         const currentOutputToken = outputToken;
         
-        // Manually check if approval is needed
+        // Only set checking state if still active (prevents state updates on unmounted components)
+        if (isActive) setCheckingApproval(true);
+        
+        // Get contracts with signer 
         const connectedContracts = await getConnectedContracts();
         let isApprovalRequired = false;
         
@@ -532,9 +533,7 @@ export const useSwap = () => {
           isApprovalRequired = allowance < amount;
         }
         
-        console.log(`Approval check for ${currentInputAmount} ${currentInputToken} result:`, isApprovalRequired);
-        
-        // Only update if the component is still mounted and values haven't changed
+        // Only update state if the component is still mounted and input values match what we checked
         if (isActive && 
             currentInputAmount === inputAmount && 
             currentInputToken === inputToken && 
@@ -543,14 +542,25 @@ export const useSwap = () => {
         }
       } catch (error) {
         console.error('Error checking approval:', error);
-        if (isActive) setNeedsApproval(false);
       } finally {
+        // Clear checking state if component is still mounted
         if (isActive) setCheckingApproval(false);
       }
     };
     
-    // Use debounced check to avoid rapid rechecking
-    approvalCheckTimeout = setTimeout(runApprovalCheck, 300);
+    // Heavy throttling - only check approval every 30 seconds or when critically important values change
+    approvalCheckTimeout = setTimeout(runApprovalCheck, 30000); // 30 second delay
+    
+    // Initial check on input change after a short delay (only once per major input change)
+    if (!checkingApproval) {
+      const initialCheckTimeout = setTimeout(runApprovalCheck, 500);
+      
+      return () => {
+        isActive = false;
+        if (approvalCheckTimeout) clearTimeout(approvalCheckTimeout);
+        if (initialCheckTimeout) clearTimeout(initialCheckTimeout);
+      };
+    }
     
     // Clean up
     return () => {
@@ -558,14 +568,14 @@ export const useSwap = () => {
       if (approvalCheckTimeout) clearTimeout(approvalCheckTimeout);
     };
   }, [
-    // Only re-run approval check when these key values change
-    isConnected, 
-    address,
-    inputAmount,
+    // Major value changes that require a fresh approval check
+    isConnected && inputAmount > 0, // Only true when both conditions are met (reduces checks)
     inputToken, 
     outputToken,
-    checkingApproval,
-    // Include necessary functions, but this shouldn't create circular dependencies
+    // Using a reference comparison trick to limit updates
+    // This will only retrigger when address changes, not on every render
+    address,
+    // Include necessary functions
     getConnectedContracts,
     getTokenAddress,
     getTokenDecimals

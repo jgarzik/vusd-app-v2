@@ -135,74 +135,81 @@ const SwapInterface = () => {
     disabled: false
   });
   
-  // Update button state directly instead of using a function
+  // Track if there's an active button update in progress to prevent excessive updates
+  const [isUpdatingButton, setIsUpdatingButton] = useState(false);
+
+  // Calculate button state only when necessary
   useEffect(() => {
-    // Only update when we're not in a loading state
-    if (loading || checkingApproval) return; 
+    // Don't calculate during loading or if we're already updating
+    if (loading || checkingApproval || isUpdatingButton) return;
     
-    console.log('Updating button state directly');
+    // Set a flag to prevent concurrent updates
+    setIsUpdatingButton(true);
     
-    // Step 1: Check if wallet is connected
+    // Use variables to track state without setting it immediately
+    let newText = "";
+    let newDisabled = false;
+    
+    // Process the waterfall of conditions in order of priority
+    
+    // Case 1: Wallet not connected
     if (!isConnected) {
-      setButtonState({
-        text: "Connect Wallet",
-        disabled: false
-      });
-      return;
+      newText = "Connect Wallet";
+      newDisabled = false;
+    }
+    // Case 2: Wrong network
+    else if (!isMainnet) {
+      newText = "Switch to Ethereum";
+      newDisabled = false;
+    }
+    // Case 3: No amount entered
+    else if (!inputAmount || inputAmount <= 0) {
+      newText = "Enter an amount";
+      newDisabled = true;
+    }
+    // Case 4: Insufficient balance (only check if input amount is valid)
+    else if (inputAmount > 0 && balances[inputToken] < inputAmount) {
+      newText = `Insufficient ${inputToken} balance`;
+      newDisabled = true;
+    }
+    // Case 5: Needs approval (only relevant for non-zero amounts)
+    else if (needsApproval) {
+      newText = "Approve";
+      newDisabled = false;
+    }
+    // Case 6: Ready to swap
+    else {
+      newText = "Swap";
+      newDisabled = false;
     }
     
-    // Step 2: Check if on Ethereum mainnet (chain ID 1)
-    if (!isMainnet) {
+    // Only update state if it's different to avoid unnecessary re-renders
+    if (buttonState.text !== newText || buttonState.disabled !== newDisabled) {
+      console.log(`Updating button state: ${newText} (disabled: ${newDisabled})`);
       setButtonState({
-        text: "Switch to Ethereum",
-        disabled: false
+        text: newText,
+        disabled: newDisabled
       });
-      return;
     }
     
-    // Validate input amount
-    if (!inputAmount || inputAmount <= 0) {
-      setButtonState({
-        text: "Enter an amount",
-        disabled: true
-      });
-      return;
-    }
-    
-    // Check token balance
-    const balance = balances[inputToken];
-    if (balance < inputAmount) {
-      setButtonState({
-        text: `Insufficient ${inputToken} balance`,
-        disabled: true
-      });
-      return;
-    }
-    
-    // Step 3: Check if token approval is needed
-    if (needsApproval) {
-      setButtonState({
-        text: `Approve`,
-        disabled: false
-      });
-      return;
-    }
-    
-    // Step 4: Execute the swap - simplified to just "Swap" for all cases
-    setButtonState({
-      text: "Swap",
-      disabled: false
-    });
+    // Clear the update flag
+    setIsUpdatingButton(false);
   }, [
+    // Only strictly necessary dependencies to reduce update frequency
     isConnected,
     isMainnet,
-    inputAmount,
+    // For inputAmount, we're only concerned with zero to non-zero transitions
+    // or when it exceeds balance
+    inputAmount > 0, 
     inputToken,
-    outputToken,
-    balances,
+    balances[inputToken] < inputAmount,
     needsApproval,
     loading,
-    checkingApproval
+    checkingApproval,
+    isUpdatingButton,
+    // Include button state to check if it's different
+    buttonState.text,
+    buttonState.disabled
   ]);
   
   // Define button actions based on current state
