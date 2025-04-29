@@ -14,7 +14,7 @@
  * should periodically refresh and also refresh after each successful swap.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTreasury } from './useTreasury';
 
 /**
@@ -28,29 +28,36 @@ import { useTreasury } from './useTreasury';
  * It's not meant to be used on the analytics page where manual refresh is required.
  */
 export const useMainPageTreasury = () => {
-  // Get the base treasury functionality
-  const treasury = useTreasury();
-  
-  // Store the timer reference for cleanup
+  const { 
+    treasuryData,
+    loading,
+    error,
+    refreshTreasuryData
+  } = useTreasury();
+
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState<boolean>(true);
   
-  // Set up auto-refresh every 2 minutes
+  // Setup periodic refresh on mount (every 2 minutes)
   useEffect(() => {
-    // Initial load happens via useTreasury
+    if (isAutoRefreshEnabled) {
+      // Initial load on mount
+      refreshTreasuryData();
+      
+      // Set up timer for periodic refresh
+      refreshTimerRef.current = setInterval(() => {
+        refreshTreasuryData();
+      }, 2 * 60 * 1000); // 2 minutes
+    }
     
-    // Set up periodic refresh timer
-    refreshTimerRef.current = setInterval(() => {
-      // Pass true to force refresh (bypass cache)
-      treasury.refreshTreasuryData(true);
-    }, 2 * 60 * 1000); // 2 minutes
-    
-    // Cleanup function to clear the interval when component unmounts
+    // Cleanup timer on unmount
     return () => {
       if (refreshTimerRef.current) {
         clearInterval(refreshTimerRef.current);
+        refreshTimerRef.current = null;
       }
     };
-  }, [treasury.refreshTreasuryData]);
+  }, [isAutoRefreshEnabled, refreshTreasuryData]);
   
   /**
    * Force refreshes treasury data after a successful swap.
@@ -61,14 +68,29 @@ export const useMainPageTreasury = () => {
    * This function should be called after a successful swap to ensure
    * treasury data reflects the latest state including the user's transaction.
    */
-  const refreshAfterSwap = async () => {
-    // Pass true to force refresh (bypass cache)
-    await treasury.refreshTreasuryData(true);
-  };
+  const refreshAfterSwap = useCallback(async () => {
+    // Force refresh by passing true to bypass cache
+    await refreshTreasuryData(true);
+  }, [refreshTreasuryData]);
   
-  // Return the same interface as useTreasury plus the refreshAfterSwap method
+  // Disable auto-refresh functionality when there's an error
+  useEffect(() => {
+    if (error) {
+      setIsAutoRefreshEnabled(false);
+      if (refreshTimerRef.current) {
+        clearInterval(refreshTimerRef.current);
+        refreshTimerRef.current = null;
+      }
+    }
+  }, [error]);
+  
   return {
-    ...treasury,
-    refreshAfterSwap
+    treasuryData,
+    loading,
+    error,
+    refreshTreasuryData,
+    refreshAfterSwap,
+    isAutoRefreshEnabled,
+    setIsAutoRefreshEnabled
   };
 };

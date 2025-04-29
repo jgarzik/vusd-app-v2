@@ -12,11 +12,12 @@
  * 2. Refresh after successful swaps (through a direct refresh method)
  */
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "wouter";
-import { useMainPageTreasury } from "@/hooks/useMainPageTreasury";
 import { formatCurrency } from "@/lib/utils";
+import { useTreasuryRefresh } from "@/hooks/TreasuryRefreshContext";
+import { TreasuryAsset } from "@/hooks/useTreasury";
 import { Shield, Coins, ArrowUpCircle, RefreshCw } from "lucide-react";
 
 /**
@@ -26,7 +27,7 @@ import { Shield, Coins, ArrowUpCircle, RefreshCw } from "lucide-react";
  * @returns {JSX.Element} The MainPageTreasuryCard component
  */
 const MainPageTreasuryCard = () => {
-  const { treasuryData, loading, refreshTreasuryData } = useMainPageTreasury();
+  const { treasuryData, loading, refreshAfterSwap } = useTreasuryRefresh();
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   
   // Function to handle manual refresh with animation
@@ -34,7 +35,7 @@ const MainPageTreasuryCard = () => {
     setIsRefreshing(true);
     try {
       // Force refresh by passing true to bypass the cache
-      await refreshTreasuryData(true);
+      await refreshAfterSwap();
     } finally {
       // Add slight delay for better UX before stopping the animation
       setTimeout(() => setIsRefreshing(false), 500);
@@ -105,7 +106,7 @@ const MainPageTreasuryCard = () => {
               <div className="text-center py-2 text-gray-400">Loading...</div>
             ) : (
               <div className="flex flex-col space-y-1.5">
-                {treasuryData.t1Assets.slice(0, 2).map((asset) => (
+                {treasuryData.t1Assets.slice(0, 2).map((asset: {symbol: string; value: number}) => (
                   <div key={asset.symbol} className="bg-background-light p-2.5 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
