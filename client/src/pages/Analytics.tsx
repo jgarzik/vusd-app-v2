@@ -19,6 +19,7 @@
  */
 
 import TreasuryCard from "@/components/analytics/TreasuryCard";
+import { MarketDataCard } from "@/components/analytics/MarketDataCard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -38,12 +39,20 @@ import { formatCurrency } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 
 /**
- * Analytics component for visualizing VUSD treasury data.
+ * Analytics component for visualizing VUSD market and treasury data.
  * 
  * @returns {JSX.Element} The Analytics page component
  * 
  * @remarks
- * This component provides a comprehensive dashboard for VUSD treasury analytics including:
+ * This component provides a comprehensive dashboard for VUSD analytics including:
+ * 
+ * Market Data section:
+ * - Current VUSD price from CoinGecko
+ * - 24-hour price change percentage
+ * - Market capitalization and trading volume
+ * - Link to CoinGecko for more detailed market information
+ * 
+ * Treasury Analytics section:
  * - Key metrics: Treasury value, circulating supply, and collateralization ratio
  * - Visual breakdowns of treasury composition through interactive charts
  * - Detailed listings of both T1 assets (whitelisted stablecoins) and T2 assets (other)
