@@ -362,7 +362,7 @@ const SwapInterface = () => {
               <Input
                 type="number"
                 placeholder="0.0"
-                className="bg-transparent text-xl font-medium w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="bg-transparent text-xl font-medium w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 value={inputAmount || ""}
                 onChange={handleInputChange}
               />
@@ -407,7 +407,7 @@ const SwapInterface = () => {
               <Input
                 type="number"
                 placeholder="0.0"
-                className="bg-transparent text-xl font-medium w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="bg-transparent text-xl font-medium w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 value={outputAmount || ""}
                 onChange={handleOutputChange}
                 readOnly={true}
