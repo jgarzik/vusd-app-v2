@@ -173,7 +173,7 @@ export const useSwap = () => {
    * @throws Displays a toast notification to the user on errors
    */
   const estimateSwap = useCallback(async (amount: number, fromToken: string, toToken: string) => {
-    if (!amount || amount <= 0) {
+    if (!amount || isNaN(amount) || amount <= 0) {
       setOutputAmount('');
       return;
     }
@@ -268,7 +268,7 @@ export const useSwap = () => {
       throw new Error('Wallet not connected');
     }
     
-    if (!inputAmount || inputAmount <= 0) {
+    if (!inputAmount || inputAmount === '' || parseFloat(inputAmount) <= 0) {
       throw new Error('Invalid amount');
     }
     
