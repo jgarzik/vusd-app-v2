@@ -189,10 +189,14 @@ const SwapInterface = () => {
     }
     
     // Step 4: Execute the swap
+    console.log(`Setting button text with: inputToken=${inputToken}, outputToken=${outputToken}`);
+    const buttonText = outputToken === 'VUSD' 
+      ? `Swap ${inputToken} for VUSD` 
+      : `Swap VUSD for ${outputToken}`;
+    console.log(`Generated button text: ${buttonText}`);
+    
     setButtonState({
-      text: outputToken === 'VUSD' 
-        ? `Swap ${inputToken} for VUSD` 
-        : `Swap VUSD for ${outputToken}`,
+      text: buttonText,
       disabled: false
     });
   }, [
