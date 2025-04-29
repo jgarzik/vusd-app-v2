@@ -106,7 +106,7 @@ const MainPageTreasuryCard = () => {
               <div className="text-center py-2 text-gray-400">Loading...</div>
             ) : (
               <div className="flex flex-col space-y-1.5">
-                {treasuryData.t1Assets.slice(0, 2).map((asset: {symbol: string; value: number}) => (
+                {treasuryData.t1Assets.slice(0, 2).map((asset: TreasuryAsset) => (
                   <div key={asset.symbol} className="bg-background-light p-2.5 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">

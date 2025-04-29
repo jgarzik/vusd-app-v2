@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { useSwap } from "@/hooks/useSwap";
 import { useWeb3 } from "@/hooks/useWeb3";
 import { useToast } from "@/hooks/use-toast";
+import { useTreasuryRefresh } from "@/hooks/TreasuryRefreshContext";
 import { formatAmount, calculateExchangeRate, parseInputAmount } from "@/lib/utils";
 import { SUPPORTED_TOKENS, Token } from "@/constants/tokens";
 
@@ -48,6 +49,7 @@ import { SUPPORTED_TOKENS, Token } from "@/constants/tokens";
  */
 const SwapInterface = () => {
   const { toast } = useToast();
+  const { refreshAfterSwap } = useTreasuryRefresh();
   const { 
     address, 
     isConnected, 
@@ -279,6 +281,9 @@ const SwapInterface = () => {
       const tx = await executeSwap();
       setTxHash(tx.hash);
       setTxStatus("success");
+      
+      // Refresh treasury data after successful swap
+      await refreshAfterSwap();
     } catch (error) {
       console.error("Swap error:", error);
       setTxStatus("error");
