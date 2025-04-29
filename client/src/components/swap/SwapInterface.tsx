@@ -182,21 +182,15 @@ const SwapInterface = () => {
     // Step 3: Check if token approval is needed
     if (needsApproval) {
       setButtonState({
-        text: `Approve ${inputToken}`,
+        text: `Approve`,
         disabled: false
       });
       return;
     }
     
-    // Step 4: Execute the swap
-    console.log(`Setting button text with: inputToken=${inputToken}, outputToken=${outputToken}`);
-    const buttonText = outputToken === 'VUSD' 
-      ? `Swap ${inputToken} for VUSD` 
-      : `Swap VUSD for ${outputToken}`;
-    console.log(`Generated button text: ${buttonText}`);
-    
+    // Step 4: Execute the swap - simplified to just "Swap" for all cases
     setButtonState({
-      text: buttonText,
+      text: "Swap",
       disabled: false
     });
   }, [
