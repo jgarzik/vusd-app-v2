@@ -472,8 +472,8 @@ const SwapInterface = () => {
             onClick={handleButtonClick}
             disabled={buttonState.disabled || loading}
           >
-            {/* Only show Loading when actively doing something */}
-            {loading ? "Loading..." : buttonState.text}
+            {/* Show transaction status when transaction is in progress */}
+            {loading ? "Confirming Transaction..." : buttonState.text}
           </Button>
           
           {/* Debug info - will remove in production */}

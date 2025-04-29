@@ -73,7 +73,7 @@ const TransactionStatus = ({
   const getStatusTitle = () => {
     switch (status) {
       case "pending":
-        return `Swap Transaction Pending`;
+        return `Transaction Awaiting Confirmation`;
       case "success":
         return `Swap Transaction Successful`;
       case "error":
@@ -86,7 +86,7 @@ const TransactionStatus = ({
   const getStatusDescription = () => {
     switch (status) {
       case "pending":
-        return "Your transaction is being processed on the blockchain";
+        return "Your transaction is awaiting confirmation on the Ethereum blockchain. This may take a few minutes.";
       case "success":
         return `You've successfully swapped ${formatAmount(fromAmount, fromToken.decimals, true)} ${fromToken.symbol} for ${formatAmount(toAmount, toToken.decimals, true)} ${toToken.symbol}`;
       case "error":
