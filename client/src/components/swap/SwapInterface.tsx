@@ -209,8 +209,8 @@ const SwapInterface = () => {
   
   // Define button actions based on current state
   const handleButtonClick = async () => {
-    // Don't do anything if button is disabled
-    if (buttonState.disabled || loading || checkingApproval) {
+    // Don't do anything if button is disabled or we're in loading state
+    if (buttonState.disabled || loading) {
       return;
     }
     
@@ -465,9 +465,9 @@ const SwapInterface = () => {
           <Button
             className="w-full font-medium rounded-xl py-6 text-base"
             onClick={handleButtonClick}
-            disabled={buttonState.disabled || loading || checkingApproval}
+            disabled={buttonState.disabled || loading}
           >
-            {/* Only show Loading when actively doing something, not during approval checks */}
+            {/* Only show Loading when actively doing something */}
             {loading ? "Loading..." : buttonState.text}
           </Button>
           
