@@ -62,11 +62,6 @@ export const useSwap = () => {
     DAI: 0,
   });
   
-  // Track when balances were last updated (for caching)
-  const [balanceLastUpdated, setBalanceLastUpdated] = useState<number>(0);
-  // Cache window in milliseconds (60 seconds)
-  const BALANCE_CACHE_DURATION = 60 * 1000;
-  
   const [inputToken, setInputToken] = useState<string>('USDC');
   const [outputToken, setOutputToken] = useState<string>('VUSD');
   const [inputAmount, setInputAmount] = useState<number>(0);
@@ -133,15 +128,8 @@ export const useSwap = () => {
    * 
    * @throws Logs errors to console but doesn't propagate them to prevent UI disruption
    */
-  const fetchBalances = useCallback(async (forceRefresh = false) => {
+  const fetchBalances = useCallback(async () => {
     if (!isConnected || !address) return;
-    
-    // Check if cached balances are still fresh (within 60 seconds)
-    const now = Date.now();
-    if (!forceRefresh && now - balanceLastUpdated < BALANCE_CACHE_DURATION) {
-      // Use cached balances if they're fresh enough
-      return;
-    }
     
     try {
       const newBalances: TokenBalances = { ...balances };
@@ -160,11 +148,10 @@ export const useSwap = () => {
       }
       
       setBalances(newBalances);
-      setBalanceLastUpdated(now); // Update the cache timestamp
     } catch (error) {
       console.error('Error fetching balances:', error);
     }
-  }, [address, isConnected, contracts, balances, balanceLastUpdated, BALANCE_CACHE_DURATION]);
+  }, [address, isConnected, contracts, balances]);
   
   /**
    * Calculates the expected output amount for a given swap.
@@ -312,8 +299,8 @@ export const useSwap = () => {
         const tx = await connectedContracts.minter.mint(inputTokenAddress, amount);
         await tx.wait();
         
-        // Refresh balances immediately after transaction (force refresh to bypass cache)
-        await fetchBalances(true);
+        // Refresh balances
+        await fetchBalances();
         return tx;
       } else {
         // Redeeming VUSD
@@ -333,8 +320,8 @@ export const useSwap = () => {
         const tx = await redeemFunc(outputTokenAddress, amount);
         await tx.wait();
         
-        // Refresh balances immediately after transaction (force refresh to bypass cache)
-        await fetchBalances(true);
+        // Refresh balances
+        await fetchBalances();
         return tx;
       }
     } catch (error) {

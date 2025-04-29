@@ -26,7 +26,6 @@ import { Input } from "@/components/ui/input";
 import { useSwap } from "@/hooks/useSwap";
 import { useWeb3 } from "@/hooks/useWeb3";
 import { useToast } from "@/hooks/use-toast";
-import { useTreasuryRefresh } from "@/hooks/TreasuryRefreshContext";
 import { formatAmount, calculateExchangeRate, parseInputAmount } from "@/lib/utils";
 import { SUPPORTED_TOKENS, Token } from "@/constants/tokens";
 
@@ -49,7 +48,6 @@ import { SUPPORTED_TOKENS, Token } from "@/constants/tokens";
  */
 const SwapInterface = () => {
   const { toast } = useToast();
-  const { refreshAfterSwap } = useTreasuryRefresh();
   const { 
     address, 
     isConnected, 
@@ -89,35 +87,21 @@ const SwapInterface = () => {
    * either token selection changes, keeping the output value in sync.
    */
   // Use a separate useEffect for estimating swap amounts with debounce to prevent rapid re-renders
-  // and to avoid circular dependencies
   useEffect(() => {
     // Skip estimate if any required values are missing
     if (!inputAmount || inputAmount <= 0 || !inputToken || !outputToken) {
-      if (outputAmount !== 0) {
-        setOutputAmount(0);
-      }
+      setOutputAmount(0);
       return;
     }
     
-    // Store current values to ensure consistency in the async context
-    const currentInputAmount = inputAmount;
-    const currentInputToken = inputToken;
-    const currentOutputToken = outputToken;
-    
-    // Use longer debounce (700ms) to significantly reduce blockchain calls
-    // This is a critical optimization for reducing RPC usage
+    // Create a debounced function with longer delay (500ms) to reduce blockchain calls
     const debouncedEstimate = setTimeout(() => {
-      // Only run estimation if values haven't changed during the debounce period
-      if (currentInputAmount === inputAmount && 
-          currentInputToken === inputToken && 
-          currentOutputToken === outputToken) {
-        estimateSwap(currentInputAmount, currentInputToken, currentOutputToken);
-      }
-    }, 700); // 700ms debounce
+      estimateSwap(inputAmount, inputToken, outputToken);
+    }, 500); // 500ms debounce
     
     // Clear timeout on cleanup
     return () => clearTimeout(debouncedEstimate);
-  }, [inputAmount, inputToken, outputToken]);
+  }, [inputAmount, inputToken, outputToken, estimateSwap, setOutputAmount]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -281,9 +265,6 @@ const SwapInterface = () => {
       const tx = await executeSwap();
       setTxHash(tx.hash);
       setTxStatus("success");
-      
-      // Refresh treasury data after successful swap
-      await refreshAfterSwap();
     } catch (error) {
       console.error("Swap error:", error);
       setTxStatus("error");

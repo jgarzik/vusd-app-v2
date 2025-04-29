@@ -22,8 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "wouter";
 import { useTreasury } from "@/hooks/useTreasury";
 import { formatCurrency } from "@/lib/utils";
-import { Shield, Coins, ArrowUpCircle, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Shield, Coins, ArrowUpCircle } from "lucide-react";
 
 interface TreasuryCardProps {
   previewMode?: boolean;
@@ -50,20 +49,7 @@ interface TreasuryCardProps {
  * All monetary values are formatted consistently using the formatCurrency utility.
  */
 const TreasuryCard = ({ previewMode = false }: TreasuryCardProps) => {
-  const { treasuryData, loading, refreshTreasuryData } = useTreasury();
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  
-  // Function to handle manual refresh with animation
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      // Force refresh by passing true to bypass the cache
-      await refreshTreasuryData(true);
-    } finally {
-      // Add slight delay for better UX before stopping the animation
-      setTimeout(() => setIsRefreshing(false), 500);
-    }
-  };
+  const { treasuryData, loading } = useTreasury();
   
   /**
    * Returns the appropriate CSS class for token icons based on token symbol.
@@ -87,25 +73,11 @@ const TreasuryCard = ({ previewMode = false }: TreasuryCardProps) => {
     <Card className="bg-card rounded-xl overflow-hidden h-full">
       <CardHeader className="px-5 py-4 border-b border-gray-800 flex justify-between items-center">
         <CardTitle className="font-heading font-semibold">VUSD Treasury</CardTitle>
-        <div className="flex items-center space-x-3">
-          {!previewMode && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleRefresh}
-              disabled={loading || isRefreshing}
-              className="p-1 h-8 w-8"
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
-              <span className="sr-only">Refresh treasury data</span>
-            </Button>
-          )}
-          {previewMode && (
-            <Link href="/analytics">
-              <a className="text-primary hover:text-primary-light text-sm font-medium">View More</a>
-            </Link>
-          )}
-        </div>
+        {previewMode && (
+          <Link href="/analytics">
+            <a className="text-primary hover:text-primary-light text-sm font-medium">View More</a>
+          </Link>
+        )}
       </CardHeader>
       <CardContent className="p-5">
         <div className="flex flex-col space-y-6">
