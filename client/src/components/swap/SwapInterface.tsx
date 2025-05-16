@@ -104,13 +104,15 @@ const SwapInterface = () => {
   }, [inputAmount, inputToken, outputToken, estimateSwap, setOutputAmount]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Get the raw input value directly from the event
     const value = e.target.value;
     
-    // Allow decimal input without enforcing minimum while typing
-    // For example: allow ".0" so user can continue typing
-    if (value === "" || value.match(/^\d*\.?\d*$/)) {
-      const parsed = parseInputAmount(value);
-      setInputAmount(parsed);
+    // Check if the input is empty or a valid decimal number (including leading zeros)
+    if (value === "" || value === "." || value === "0." || 
+        /^(0|[1-9]\d*)?\.?\d*$/.test(value)) {
+      // For display purposes, keep the value as is
+      // This allows for values like "0.01" to be displayed correctly
+      setInputAmount(value === "" ? 0 : parseFloat(value) || 0);
     }
   };
 
