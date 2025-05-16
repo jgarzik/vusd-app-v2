@@ -401,7 +401,11 @@ const SwapInterface = () => {
                 <span className="mr-2">{isConnected ? formatAmount(balances[inputToken] || 0, getTokenDecimals(inputToken)) : "-"}</span>
                 {isConnected && balances[inputToken] > 0 && (
                   <button 
-                    onClick={() => setInputAmount(balances[inputToken])}
+                    onClick={() => {
+                      // Update both raw input value and numeric amount
+                      setRawInputValue(balances[inputToken].toString());
+                      setInputAmount(balances[inputToken]);
+                    }}
                     className="bg-background hover:bg-primary/10 text-primary text-xs font-medium px-2 py-0.5 rounded"
                   >
                     MAX
