@@ -105,7 +105,14 @@ const SwapInterface = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setInputAmount(parseInputAmount(value));
+    const parsed = parseInputAmount(value);
+    
+    // Enforce minimum value of 0.0001 when the input is not empty
+    if (value && parsed < 0.0001) {
+      setInputAmount(0.0001);
+    } else {
+      setInputAmount(parsed);
+    }
   };
 
   const handleOutputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,9 +170,9 @@ const SwapInterface = () => {
       newText = "Switch to Ethereum";
       newDisabled = false;
     }
-    // Case 3: No amount entered
-    else if (!inputAmount || inputAmount <= 0) {
-      newText = "Enter an amount";
+    // Case 3: No amount entered or below minimum
+    else if (!inputAmount || inputAmount < 0.0001) {
+      newText = "Enter amount (min 0.0001)";
       newDisabled = true;
     }
     // Case 4: Insufficient balance (only check if input amount is valid)
@@ -376,8 +383,17 @@ const SwapInterface = () => {
           <div className="bg-background-light rounded-xl p-4 mb-2">
             <div className="flex justify-between items-center mb-2">
               <label className="text-sm text-gray-400">From</label>
-              <div className="text-sm text-gray-400">
-                Balance: <span>{isConnected ? formatAmount(balances[inputToken] || 0, getTokenDecimals(inputToken)) : "-"}</span>
+              <div className="flex items-center text-sm text-gray-400">
+                <span>Balance: </span>
+                <span className="mr-2">{isConnected ? formatAmount(balances[inputToken] || 0, getTokenDecimals(inputToken)) : "-"}</span>
+                {isConnected && balances[inputToken] > 0 && (
+                  <button 
+                    onClick={() => setInputAmount(balances[inputToken])}
+                    className="bg-background hover:bg-primary/10 text-primary text-xs font-medium px-2 py-0.5 rounded"
+                  >
+                    MAX
+                  </button>
+                )}
               </div>
             </div>
             
@@ -388,6 +404,8 @@ const SwapInterface = () => {
                 className="bg-transparent text-xl font-medium w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 value={inputAmount || ""}
                 onChange={handleInputChange}
+                step="0.0001"
+                min="0.0001"
               />
               
               <button 
