@@ -105,12 +105,11 @@ const SwapInterface = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    const parsed = parseInputAmount(value);
     
-    // Enforce minimum value of 0.0001 when the input is not empty
-    if (value && parsed < 0.0001) {
-      setInputAmount(0.0001);
-    } else {
+    // Allow decimal input without enforcing minimum while typing
+    // For example: allow ".0" so user can continue typing
+    if (value === "" || value.match(/^\d*\.?\d*$/)) {
+      const parsed = parseInputAmount(value);
       setInputAmount(parsed);
     }
   };
@@ -170,7 +169,7 @@ const SwapInterface = () => {
       newText = "Switch to Ethereum";
       newDisabled = false;
     }
-    // Case 3: No amount entered or below minimum
+    // Case 3: No amount entered or below minimum threshold for executing swap
     else if (!inputAmount || inputAmount < 0.0001) {
       newText = "Enter amount (min 0.0001)";
       newDisabled = true;
@@ -401,11 +400,10 @@ const SwapInterface = () => {
               <Input
                 type="number"
                 placeholder="0.0"
-                className="bg-transparent text-xl font-medium w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="bg-transparent text-xl font-medium w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 value={inputAmount || ""}
                 onChange={handleInputChange}
-                step="0.0001"
-                min="0.0001"
+                min="0"
               />
               
               <button 
