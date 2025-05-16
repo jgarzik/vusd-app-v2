@@ -103,16 +103,28 @@ const SwapInterface = () => {
     return () => clearTimeout(debouncedEstimate);
   }, [inputAmount, inputToken, outputToken, estimateSwap, setOutputAmount]);
 
+  // Use state to track the raw input string for better input experience
+  const [rawInputValue, setRawInputValue] = useState("");
+  
+  // Handle input change with proper decimal and leading zero support
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Get the raw input value directly from the event
     const value = e.target.value;
     
-    // Check if the input is empty or a valid decimal number (including leading zeros)
-    if (value === "" || value === "." || value === "0." || 
-        /^(0|[1-9]\d*)?\.?\d*$/.test(value)) {
-      // For display purposes, keep the value as is
-      // This allows for values like "0.01" to be displayed correctly
-      setInputAmount(value === "" ? 0 : parseFloat(value) || 0);
+    // Allow empty input, single decimal point, or valid number patterns including leading zeros
+    if (
+      value === "" || 
+      value === "." || 
+      value === "0" || 
+      value === "0." ||
+      /^(0|[1-9]\d*)(\.\d*)?$/.test(value) ||  // handles "0", "0.", "0.1", "0.01", etc.
+      /^\.\d*$/.test(value)                     // handles ".1", ".01", etc.
+    ) {
+      // Store the raw value for display purposes
+      setRawInputValue(value);
+      
+      // Convert to number for calculations (0 if empty or just decimal point)
+      const numericValue = value === "" || value === "." ? 0 : parseFloat(value);
+      setInputAmount(numericValue);
     }
   };
 
@@ -400,12 +412,12 @@ const SwapInterface = () => {
             
             <div className="flex items-center">
               <Input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 placeholder="0.0"
-                className="bg-transparent text-xl font-medium w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                value={inputAmount || ""}
+                className="bg-transparent text-xl font-medium w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                value={rawInputValue}
                 onChange={handleInputChange}
-                min="0"
               />
               
               <button 
